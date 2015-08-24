@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>weblab-common-java</artifactId>
+        <groupId>ucles.weblab</groupId>
+        <version>0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>weblab-spring-boot</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>weblab-spring-boot-starter</module>
+        <module>weblab-spring-boot-starter-test</module>
+        <module>weblab-spring-boot-starter-workflow</module>
+        <module>weblab-spring-boot-autoconfiguration</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- The Fowler release gets us Java 8 goodies:
+             see https://spring.io/blog/2015/03/26/what-s-new-in-spring-data-fowler -->
+        <spring-data-releasetrain.version>Fowler-RELEASE</spring-data-releasetrain.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-releasetrain</artifactId>
+                <version>${spring-data-releasetrain.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  ucles.weblab.common.config.files.FilesAutoConfiguration,\
+  ucles.weblab.common.config.files.FilesJpaAutoConfiguration,\
+  ucles.weblab.common.config.files.FilesMongoAutoConfiguration
