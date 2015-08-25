@@ -2,7 +2,9 @@ Workflow Module
 ===============
 
 The workflow module is a bounded context covering workflow models, process definitions and process instances (executions).
-It is contained in the package `ucles.weblab.common.worfklow`. It wraps the behaviour of a third party workflow engine,
+It is contained in the package `ucles.weblab.common.worfklow` and is delivered as a _Spring Boot Starter_ module.
+
+It wraps the behaviour of a third party workflow engine,
 in this case Activiti. By providing this _Façade_, the underlying workflow engine can be swapped out
 without any change to other application code.
 
@@ -185,6 +187,18 @@ and audit (`act_hi_taskinst`) data. Refer to the Activiti documentation for furt
 Spring Boot Integration
 -----------------------
 
+Workflow is delivered as a _Spring Boot Starter_ module. Spring Boot Starters are a set of convenient dependency
+descriptors that you can include in your application. You get a one-stop-shop for all the Spring and related technology
+that you need without having to hunt through sample code and copy paste loads of dependency descriptors. They are also
+autoconfigured with useful default behaviour.
+
+### IMPORTANT: Spring Security
+By default, Activiti configures Spring Security to delegate authentication to its own `IdentityService`. An application wanting
+to implement some other authentication mechanism (e.g. Active Directory) should exclude this auto-configuration using:
+```java
+@EnableAutoConfiguration(exclude={org.activiti.spring.boot.SecurityAutoConfiguration.class})
+```
+
 ### Auto-deployment
 Activiti's Spring Boot integration will automatically deploy processes on the classpath under `/processes` at runtime into the
 workflow engine.
@@ -198,13 +212,6 @@ to refresh them at the next workflow step (as it only really holds the primary k
 ### Access to beans
 Any Spring beans can be called directly from workflow service tasks using Spring EL expressions. This allows us to use
 the domain repositories and services to manipulate the model directly from the workflow without implementing custom tasks.
-
-### Spring Security
-By default, Activiti configures Spring Security to delegate authentication to its own `IdentityService`. An application wanting
-to implement some other authentication mechanism (e.g. Active Directory) should exclude this auto-configuration using:
-```java
-@EnableAutoConfiguration(exclude={org.activiti.spring.boot.SecurityAutoConfiguration.class})
-```
 
 User Task Forms
 ---------------
