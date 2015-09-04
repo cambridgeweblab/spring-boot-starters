@@ -1,9 +1,12 @@
 package ucles.weblab.common.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.MultipartProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,6 +23,7 @@ import ucles.weblab.common.webapi.converter.MoreJsr310Converters;
 import ucles.weblab.common.webapi.multipart.jersey.JerseyMultipartResolver;
 
 import javax.persistence.EntityManager;
+import javax.servlet.MultipartConfigElement;
 
 /**
  * Auto-configuration for the common classes.
@@ -30,11 +34,20 @@ import javax.persistence.EntityManager;
 @AutoConfigureBefore(DispatcherServletAutoConfiguration.class)
 @ComponentScan(basePackageClasses = ControllerExceptionHandler.class)
 @Import({ConfigurableEntitySupport.class, MoreGenericConverters.class, MoreJsr310Converters.class})
+@EnableConfigurationProperties(MultipartProperties.class)
 public class CommonConfig {
+    @Autowired
+   	MultipartProperties multipartProperties = new MultipartProperties();
 
     @Bean
     BuilderProxyFactory builderProxyFactory() {
         return new BuilderProxyFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MultipartConfigElement multipartConfigElement() {
+        return this.multipartProperties.createMultipartConfig();
     }
 
     /**
@@ -43,8 +56,11 @@ public class CommonConfig {
      */
     @Bean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
     @ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
-    MultipartResolver multipartResolver() {
-        return new JerseyMultipartResolver();
+    MultipartResolver multipartResolver(MultipartConfigElement multipartConfigElement) {
+        JerseyMultipartResolver jerseyMultipartResolver = new JerseyMultipartResolver();
+        jerseyMultipartResolver.setSizeMax(multipartConfigElement.getMaxRequestSize());
+        jerseyMultipartResolver.setFileSizeMax(multipartConfigElement.getMaxFileSize());
+        return jerseyMultipartResolver;
     }
 
     @Configuration
