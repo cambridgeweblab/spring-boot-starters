@@ -44,19 +44,14 @@ public class CommonConfig {
         return new BuilderProxyFactory();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public MultipartConfigElement multipartConfigElement() {
-        return this.multipartProperties.createMultipartConfig();
-    }
-
     /**
      * Use JerseyMultipartResolver instead of the default StandardServletMultipartResolver or CommonsMultipartResolver
      * as it can handle base64 Content-Transfer-Encoding.
      */
     @Bean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
     @ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
-    MultipartResolver multipartResolver(MultipartConfigElement multipartConfigElement) {
+    MultipartResolver multipartResolver() {
+        MultipartConfigElement multipartConfigElement = multipartProperties.createMultipartConfig();;
         JerseyMultipartResolver jerseyMultipartResolver = new JerseyMultipartResolver();
         jerseyMultipartResolver.setSizeMax(multipartConfigElement.getMaxRequestSize());
         jerseyMultipartResolver.setFileSizeMax(multipartConfigElement.getMaxFileSize());
