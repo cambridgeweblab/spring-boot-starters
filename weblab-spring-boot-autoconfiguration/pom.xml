@@ -31,5 +31,10 @@
             <artifactId>weblab-files</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>ucles.weblab</groupId>
+            <artifactId>weblab-audit</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

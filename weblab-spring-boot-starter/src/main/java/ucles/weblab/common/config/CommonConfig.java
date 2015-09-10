@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import ucles.weblab.common.domain.BuilderProxyFactory;
 import ucles.weblab.common.domain.ConfigurableEntitySupport;
+import ucles.weblab.common.domain.jpa.MoreCoreJavaJpaConverters;
 import ucles.weblab.common.domain.jpa.MoreJsr310JpaConverters;
 import ucles.weblab.common.webapi.ControllerExceptionHandler;
 import ucles.weblab.common.webapi.converter.MoreGenericConverters;
@@ -60,7 +61,7 @@ public class CommonConfig {
 
     @Configuration
     @ConditionalOnClass(EntityManager.class)
-    @EntityScan(basePackageClasses = {MoreJsr310JpaConverters.class})
+    @EntityScan(basePackageClasses = {MoreJsr310JpaConverters.class, MoreCoreJavaJpaConverters.class})
     public static class CommonJpaConvertersConfig {}
 
 }
