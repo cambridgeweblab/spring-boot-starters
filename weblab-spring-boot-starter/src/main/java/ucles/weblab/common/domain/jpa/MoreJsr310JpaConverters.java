@@ -8,7 +8,7 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
 /**
- * JPA 2.1 converter to turn JSR-310 {@link java.time.YearMonth} and {@link java.time.Year} types into {@link java.lang.String Strings}
+ * JPA 2.1 converter to turn JSR-310  {@link java.time.YearMonth} and {@link java.time.Year} types into {@link java.lang.String Strings}
  * for persistence.
  * To activate these converters, make sure your persistence provider detects it by including this class in the list of
  * mapped classes e.g. with the annotation property {@link EntityScan#basePackages()}.
