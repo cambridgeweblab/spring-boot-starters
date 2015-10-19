@@ -21,6 +21,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Upgrade Spring to 4.1.8 due to vulnerability CVE-2015-5211 RFD Attack in Spring Framework
+             See http://pivotal.io/security/cve-2015-5211 -->
+        <spring.version>4.1.8.RELEASE</spring.version>
         <!-- The Fowler release gets us Java 8 goodies:
              see https://spring.io/blog/2015/03/26/what-s-new-in-spring-data-fowler -->
         <spring-data-releasetrain.version>Fowler-RELEASE</spring-data-releasetrain.version>
