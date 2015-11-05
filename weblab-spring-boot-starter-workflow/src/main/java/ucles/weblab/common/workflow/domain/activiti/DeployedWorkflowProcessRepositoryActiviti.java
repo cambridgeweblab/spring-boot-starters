@@ -30,6 +30,13 @@ public class DeployedWorkflowProcessRepositoryActiviti implements DeployedWorkfl
     }
 
     @Override
+    public List<? extends DeployedWorkflowProcessEntity> findAllByStartMessage(String startMessage) {
+        return repositoryService.createProcessDefinitionQuery().latestVersion().messageEventSubscriptionName(startMessage).list().stream()
+                .map(DeployedWorkflowProcessEntityActiviti::new)
+                .collect(toList());
+    }
+
+    @Override
     public Optional<? extends DeployedWorkflowProcessEntity> findOneById(String id) {
         try {
             return Optional.of(new DeployedWorkflowProcessEntityActiviti(repositoryService.getProcessDefinition(id)));

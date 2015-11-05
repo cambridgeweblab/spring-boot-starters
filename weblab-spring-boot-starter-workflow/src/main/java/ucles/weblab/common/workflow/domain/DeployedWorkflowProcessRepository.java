@@ -17,5 +17,7 @@ import java.util.Optional;
 public interface DeployedWorkflowProcessRepository {
     List<? extends DeployedWorkflowProcessEntity> findAllByCurrentVersionTrue();
 
+    List<? extends DeployedWorkflowProcessEntity> findAllByStartMessage(String startMessage);
+
     Optional<? extends DeployedWorkflowProcessEntity> findOneById(String id);
 }

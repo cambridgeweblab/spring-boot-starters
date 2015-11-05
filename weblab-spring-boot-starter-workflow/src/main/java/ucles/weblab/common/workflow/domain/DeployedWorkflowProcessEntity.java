@@ -1,6 +1,7 @@
 package ucles.weblab.common.workflow.domain;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Persistence-technology-neutral interface representing a persistable deployed process definition.
@@ -18,6 +19,9 @@ public interface DeployedWorkflowProcessEntity extends WorkflowProcess {
 
     /** Diagram view of the process, in PNG format. */
     byte[] getPngDiagram();
+
+    /** Definition of the form fields required to start this process. */
+    List<? extends WorkflowTaskFormField> getStartFormFields();
 
     /** When the workflow process was deployed. */
     Instant deployedInstant();
