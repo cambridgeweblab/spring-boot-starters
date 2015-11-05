@@ -185,6 +185,12 @@ public class WorkflowController {
         return deployedWorkflowProcessResourceAssembler.toResource(workflowService.deployModelAsProcessDefinition(model));
     }
 
+    @RequestMapping(value = "/instanceKey/{businessKey}/handlers/{eventName}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Void> handleEvent(@PathVariable String businessKey, @PathVariable String eventName, @RequestParam Map<String, String> allParameters, Principal principal) {
+        final boolean delivered = workflowService.handleEvent(eventName, businessKey);
+        return new ResponseEntity<>(delivered? HttpStatus.ACCEPTED : HttpStatus.NOT_FOUND);
+    }
+
     @RequestMapping(value = "/instanceKey/{businessKey}/tasks/{taskId}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Void> completeTask(@PathVariable String businessKey, @PathVariable String taskId, @RequestParam Map<String, String> allParameters, Principal principal) {
         final WorkflowTaskEntity task = workflowTaskRepository.findOneByProcessInstanceBusinessKeyAndId(businessKey, taskId)
