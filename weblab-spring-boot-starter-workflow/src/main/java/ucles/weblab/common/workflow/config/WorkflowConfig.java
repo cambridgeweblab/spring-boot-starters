@@ -20,11 +20,13 @@ import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.EditableWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.HistoricWorkflowStepRepository;
 import ucles.weblab.common.workflow.domain.WorkflowBuilders;
+import ucles.weblab.common.workflow.domain.WorkflowFactory;
 import ucles.weblab.common.workflow.domain.WorkflowService;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.workflow.domain.activiti.DeployedWorkflowProcessRepositoryActiviti;
 import ucles.weblab.common.workflow.domain.activiti.EditableWorkflowProcessRepositoryActiviti;
 import ucles.weblab.common.workflow.domain.activiti.HistoricWorkflowStepRepositoryActiviti;
+import ucles.weblab.common.workflow.domain.activiti.WorkflowFactoryActiviti;
 import ucles.weblab.common.workflow.domain.activiti.WorkflowServiceActiviti;
 import ucles.weblab.common.workflow.domain.activiti.WorkflowTaskRepositoryActiviti;
 import ucles.weblab.common.workflow.webapi.WorkflowController;
@@ -44,6 +46,11 @@ import java.util.UUID;
 @ComponentScan(basePackageClasses = {StencilsetRestResource.class, ModelEditorJsonRestResource.class, WorkflowController.class})
 @Import({WorkflowConverters.class, WorkflowBuilders.class})
 public class WorkflowConfig {
+
+    @Bean
+    public WorkflowFactory workflowFactory(RepositoryService repositoryService) {
+        return new WorkflowFactoryActiviti(repositoryService);
+    }
 
     @Bean
     public WorkflowService workflowService(RepositoryService repositoryService, RuntimeService runtimeService,

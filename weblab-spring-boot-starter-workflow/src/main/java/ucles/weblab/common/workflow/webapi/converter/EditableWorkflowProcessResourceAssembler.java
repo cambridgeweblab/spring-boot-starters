@@ -2,7 +2,9 @@ package ucles.weblab.common.workflow.webapi.converter;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ucles.weblab.common.webapi.LinkRelation;
+import ucles.weblab.common.webapi.StaticLinkBuilder;
 import ucles.weblab.common.workflow.domain.EditableWorkflowProcessEntity;
 import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.workflow.webapi.resource.WorkflowModelResource;
@@ -21,7 +23,11 @@ public class EditableWorkflowProcessResourceAssembler implements ResourceAssembl
         WorkflowModelResource resource = new WorkflowModelResource(entity.getKey(), entity.getName(),
                 entity.getLastUpdatedInstant());
 
-        resource.add(new Link("/modeler.html?modelId=" + entity.getId(), LinkRelation.EDIT_FORM.rel()));
+        resource.add(linkTo(methodOn(WorkflowController.class).returnModelForProcess(entity.getId())).withSelfRel());
+
+        final ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentContextPath();
+        final StaticLinkBuilder linkBuilder = new StaticLinkBuilder(builder);
+        resource.add(linkBuilder.slash("modeler.html?modelId=" + entity.getId()).withRel(LinkRelation.EDIT_FORM.rel()));
         resource.add(new Link(linkTo(methodOn(WorkflowController.class).returnBpmn20XmlForModel(entity.getId()))
                 .toUriComponentsBuilder().toUriString() + ".xml", LinkRelation.CANONICAL.rel()));
         return resource;

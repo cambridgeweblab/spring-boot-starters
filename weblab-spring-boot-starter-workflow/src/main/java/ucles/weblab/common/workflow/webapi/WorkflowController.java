@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.webapi.AccessAudited;
 import ucles.weblab.common.webapi.exception.ReferencedEntityNotFoundException;
 import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
+import ucles.weblab.common.webapi.resource.ResourceListWrapper;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.EditableWorkflowProcessEntity;
 import ucles.weblab.common.workflow.domain.EditableWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.HistoricWorkflowStepEntity;
 import ucles.weblab.common.workflow.domain.HistoricWorkflowStepRepository;
+import ucles.weblab.common.workflow.domain.WorkflowFactory;
+import ucles.weblab.common.workflow.domain.WorkflowProcess;
 import ucles.weblab.common.workflow.domain.WorkflowService;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
@@ -60,17 +63,19 @@ public class WorkflowController {
     private final EditableWorkflowProcessRepository editableWorkflowProcessRepository;
     private final WorkflowTaskRepository workflowTaskRepository;
     private final HistoricWorkflowStepRepository historicWorkflowStepRepository;
+    private final WorkflowFactory workflowFactory;
     private final WorkflowService workflowService;
     private final DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler;
     private final EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler;
     private final WorkflowAuditResourceAssembler workflowAuditResourceAssembler;
 
     @Autowired
-    public WorkflowController(DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, EditableWorkflowProcessRepository editableWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, HistoricWorkflowStepRepository historicWorkflowStepRepository, WorkflowService workflowService, DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler, EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler, WorkflowAuditResourceAssembler workflowAuditResourceAssembler) {
+    public WorkflowController(DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, EditableWorkflowProcessRepository editableWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, HistoricWorkflowStepRepository historicWorkflowStepRepository, WorkflowFactory workflowFactory, WorkflowService workflowService, DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler, EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler, WorkflowAuditResourceAssembler workflowAuditResourceAssembler) {
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
         this.editableWorkflowProcessRepository = editableWorkflowProcessRepository;
         this.workflowTaskRepository = workflowTaskRepository;
         this.historicWorkflowStepRepository = historicWorkflowStepRepository;
+        this.workflowFactory = workflowFactory;
         this.workflowService = workflowService;
         this.deployedWorkflowProcessResourceAssembler = deployedWorkflowProcessResourceAssembler;
         this.editableWorkflowProcessResourceAssembler = editableWorkflowProcessResourceAssembler;
@@ -120,6 +125,36 @@ public class WorkflowController {
         ResourceSupport resource = new ResourceSupport();
         resource.add(linkTo(methodOn(WorkflowController.class).returnModelForProcess(model.getId())).withSelfRel());
         return new ResponseEntity<>(resource, locationHeader(resource), HttpStatus.SEE_OTHER);
+    }
+
+    @RequestMapping(value = "/models", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
+    public ResourceListWrapper<WorkflowModelResource> listModels() {
+        return ResourceListWrapper.wrap(editableWorkflowProcessRepository.findAll().stream()
+                .map(editableWorkflowProcessResourceAssembler::toResource)
+                .collect(toList()));
+    }
+
+    @RequestMapping(value = "/models/", method = POST, consumes = APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<WorkflowModelResource> createNewModel(@RequestBody WorkflowModelResource resource) {
+        WorkflowProcess data = new WorkflowProcess() {
+            @Override
+            public String getName() {
+                return resource.getName();
+            }
+
+            @Override
+            public String getKey() {
+                return resource.getKey();
+            }
+
+            @Override
+            public Source getBpmn20Xml() {
+                return null;
+            }
+        };
+        final EditableWorkflowProcessEntity entity = workflowFactory.newEditableWorkflowProcess(data);
+        WorkflowModelResource response = editableWorkflowProcessResourceAssembler.toResource(editableWorkflowProcessRepository.save(entity));
+        return new ResponseEntity<>(response, locationHeader(response), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/models/{modelId}", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)

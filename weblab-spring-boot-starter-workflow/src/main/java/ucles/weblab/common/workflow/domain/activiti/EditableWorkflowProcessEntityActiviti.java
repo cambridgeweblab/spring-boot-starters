@@ -96,4 +96,8 @@ public class EditableWorkflowProcessEntityActiviti implements EditableWorkflowPr
     public Instant getLastUpdatedInstant() {
         return model.getLastUpdateTime().toInstant();
     }
+
+    public Model getModel() {
+        return model;
+    }
 }

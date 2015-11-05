@@ -60,12 +60,7 @@ public class WorkflowServiceActiviti implements WorkflowService {
     public EditableWorkflowProcessEntity convertProcessDefinitionToModel(DeployedWorkflowProcessEntity deployedWorkflowProcessEntity) {
         try {
             ProcessDefinition processDefinition = ((DeployedWorkflowProcessEntityActiviti) deployedWorkflowProcessEntity).getProcessDefinition();
-
-            InputStream bpmnStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
-            XMLInputFactory xif = XmlUtil.createSafeXmlInputFactory();
-            InputStreamReader in = new InputStreamReader(bpmnStream, StandardCharsets.UTF_8);
-            XMLStreamReader xtr = xif.createXMLStreamReader(in);
-            BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinition.getId());
 
             if (bpmnModel.getMainProcess() == null || bpmnModel.getMainProcess().getId() == null) {
                 throw new IllegalStateException(Messages.MODEL_IMPORT_FAILED);

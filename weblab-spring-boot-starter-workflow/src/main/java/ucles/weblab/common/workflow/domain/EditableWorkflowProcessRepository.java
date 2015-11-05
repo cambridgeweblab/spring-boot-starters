@@ -1,5 +1,6 @@
 package ucles.weblab.common.workflow.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,5 +19,9 @@ public interface EditableWorkflowProcessRepository {
 
     Optional<? extends EditableWorkflowProcessEntity> findOneById(String id);
 
+    List<? extends EditableWorkflowProcessEntity> findAll();
+
     void deleteById(String id);
+
+    EditableWorkflowProcessEntity save(EditableWorkflowProcessEntity entity);
 }
