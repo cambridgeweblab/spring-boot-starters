@@ -83,13 +83,13 @@ public class WorkflowController {
     }
 
     @RequestMapping(value = "/processes/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
-    public List<WorkflowProcessDefResource> listWorkflowProcessDefinitions() {
+    public ResourceListWrapper<WorkflowProcessDefResource> listWorkflowProcessDefinitions() {
         final List<? extends DeployedWorkflowProcessEntity> entities = deployedWorkflowProcessRepository.findAllByCurrentVersionTrue();
         // The resource assembler checks if there is already a model with the same key as this process and
         // links to either #createAndReturnModelForProcess or #returnModelForProcess depending on that check.
-        return entities.stream()
+        return ResourceListWrapper.wrap(entities.stream()
                 .map(deployedWorkflowProcessResourceAssembler::toResource)
-                .collect(toList());
+                .collect(toList()));
     }
 
     @RequestMapping(value = "/processes/{processId}/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
