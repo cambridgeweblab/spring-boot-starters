@@ -3,6 +3,7 @@ package ucles.weblab.common.workflow.domain.activiti;
 import org.activiti.engine.FormService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.FormType;
+import org.activiti.engine.impl.form.EnumFormType;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -10,6 +11,7 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -73,14 +75,19 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
 
         return formService.getTaskFormData(task.getId()).getFormProperties().stream()
                 .filter(FormProperty::isWritable)
-                .map(f -> workflowTaskFormFieldBuilder.get()
-                        .name(f.getId())
-                        .label(f.getName())
-                        .description("")
-                        .required(f.isRequired())
-                        .defaultValue(f.getValue())
-                        .type(typeMapper.apply(f.getType()))
-                        .get())
+                .map(f -> {
+                    WorkflowTaskFormField.Builder builder = workflowTaskFormFieldBuilder.get()
+                            .name(f.getId())
+                            .label(f.getName())
+                            .description("")
+                            .required(f.isRequired())
+                            .defaultValue(f.getValue())
+                            .type(typeMapper.apply(f.getType()));
+                    if (f.getType() instanceof EnumFormType) {
+                        builder.enumValues((Map<String, String>) f.getType().getInformation("values"));
+                    }
+                    return builder.get();
+                })
                 .collect(toList());
     }
 }
