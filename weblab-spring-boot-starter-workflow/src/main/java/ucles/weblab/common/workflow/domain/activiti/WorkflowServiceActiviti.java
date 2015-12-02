@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.stream.XMLInputFactory;
@@ -110,7 +111,7 @@ public class WorkflowServiceActiviti implements WorkflowService {
     }
 
     @Override
-    public boolean handleEvent(String eventName, String businessKey) {
+    public boolean handleEvent(String eventName, String businessKey, Map<String,String> parameters) {
         boolean messageAccepted = false;
         final List<Execution> executions = runtimeService.createExecutionQuery().processInstanceBusinessKey(businessKey).list();
         if (!executions.isEmpty()) {
@@ -124,8 +125,14 @@ public class WorkflowServiceActiviti implements WorkflowService {
             }
             log.warn("Event " + eventName + " with key " + businessKey + " did nothing - the running process was not interested.");
         } else {
-            try {
-                runtimeService.startProcessInstanceByMessage(eventName, businessKey);
+            try {                         
+                //convert form strings to objects
+                Map<String,Object> objectParams = new HashMap<>();
+                parameters.keySet().stream().forEach((key) -> {
+                    objectParams.put(key, parameters.get(key));
+                });
+                
+                runtimeService.startProcessInstanceByMessage(eventName, businessKey, objectParams);
                 messageAccepted = true;
             } catch (ActivitiException e) {
                 log.warn("Event " + eventName + " with key " + businessKey + " did nothing - no process starts with that message.");

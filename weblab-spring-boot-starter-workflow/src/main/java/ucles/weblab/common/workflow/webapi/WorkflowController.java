@@ -187,7 +187,7 @@ public class WorkflowController {
 
     @RequestMapping(value = "/instanceKey/{businessKey}/handlers/{eventName}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Void> handleEvent(@PathVariable String businessKey, @PathVariable String eventName, @RequestParam Map<String, String> allParameters, Principal principal) {
-        final boolean delivered = workflowService.handleEvent(eventName, businessKey);
+        final boolean delivered = workflowService.handleEvent(eventName, businessKey, allParameters);
         return new ResponseEntity<>(delivered? HttpStatus.ACCEPTED : HttpStatus.NOT_FOUND);
     }
 

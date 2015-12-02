@@ -40,9 +40,10 @@ public interface WorkflowService {
      *
      * @param eventName the event name which should match a name on a BPMN 2.0.
      * @param businessKey business key of the process instance
+     * @param parameters
      * @return true if the message was delivered to a (new or existing) process instance
      */
-    boolean handleEvent(String eventName, String businessKey);
+    boolean handleEvent(String eventName, String businessKey, Map<String,String> parameters);
 
     /**
      * Completes a task with user data that was entered as properties in a form. The task is also claimed for a user.
