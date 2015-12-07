@@ -22,14 +22,14 @@ public class WorkflowTaskRepositoryActiviti implements WorkflowTaskRepository {
 
     @Override
     public List<WorkflowTaskEntityActiviti> findAllByProcessInstanceBusinessKey(String businessKey) {
-        return taskService.createTaskQuery().processInstanceBusinessKey(businessKey).active().list().stream()
+        return taskService.createTaskQuery().processInstanceBusinessKey(businessKey).active().includeProcessVariables().list().stream()
                 .map(WorkflowTaskEntityActiviti::new)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<? extends WorkflowTaskEntity> findOneByProcessInstanceBusinessKeyAndId(String businessKey, String taskId) {
-        return Optional.ofNullable(taskService.createTaskQuery().active().taskId(taskId).processInstanceBusinessKey(businessKey).singleResult())
+        return Optional.ofNullable(taskService.createTaskQuery().active().taskId(taskId).processInstanceBusinessKey(businessKey).includeProcessVariables().singleResult())
                 .map(WorkflowTaskEntityActiviti::new);
     }
 }

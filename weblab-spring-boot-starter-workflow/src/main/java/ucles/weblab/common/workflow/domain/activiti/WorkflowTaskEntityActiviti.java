@@ -7,6 +7,7 @@ import org.activiti.engine.impl.form.EnumFormType;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import ucles.weblab.common.workflow.domain.WorkflowTaskContext;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
 
@@ -28,6 +29,7 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     private final Task task;
     private FormService formService;
     private Supplier<WorkflowTaskFormField.Builder> workflowTaskFormFieldBuilder;
+    private Supplier<WorkflowTaskContext.Builder> workflowTaskContextBuilder;
 
     {
         configureBean(this);
@@ -48,8 +50,9 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     }
 
     @Autowired
-    void configureWorkflowTaskFormFieldBuilder(Supplier<WorkflowTaskFormField.Builder> workflowTaskFormFieldBuilder) {
+    void configureWorkflowBuilders(Supplier<WorkflowTaskFormField.Builder> workflowTaskFormFieldBuilder, Supplier<WorkflowTaskContext.Builder> workflowTaskContextBuilder) {
         this.workflowTaskFormFieldBuilder = workflowTaskFormFieldBuilder;
+        this.workflowTaskContextBuilder = workflowTaskContextBuilder;
     }
 
     @Override
@@ -65,6 +68,11 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     @Override
     public String getDescription() {
         return task.getDescription();
+    }
+
+    @Override
+    public String getFormKey() {
+        return task.getFormKey();
     }
 
     @Override
@@ -89,5 +97,12 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
                     return builder.get();
                 })
                 .collect(toList());
+    }
+
+    @Override
+    public WorkflowTaskContext getContext() {
+        return workflowTaskContextBuilder.get()
+                .variables(task.getProcessVariables())
+                .get();
     }
 }

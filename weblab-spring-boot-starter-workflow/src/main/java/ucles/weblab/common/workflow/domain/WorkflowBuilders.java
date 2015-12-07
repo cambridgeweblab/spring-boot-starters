@@ -25,4 +25,9 @@ public class WorkflowBuilders {
     public Supplier<WorkflowTaskAggregate.Builder> workflowTaskAggregateBuilder() {
         return () -> builderProxyFactory.builder(WorkflowTaskAggregate.Builder.class, WorkflowTaskAggregate.class);
     }
+
+    @Bean
+    public Supplier<WorkflowTaskContext.Builder> workflowTaskContextBuilder() {
+        return () -> builderProxyFactory.builder(WorkflowTaskContext.Builder.class, WorkflowTaskContext.class);
+    }
 }
