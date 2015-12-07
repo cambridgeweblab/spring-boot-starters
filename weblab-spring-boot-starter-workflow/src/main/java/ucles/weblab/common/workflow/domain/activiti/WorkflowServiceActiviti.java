@@ -144,7 +144,9 @@ public class WorkflowServiceActiviti implements WorkflowService {
 
     @Override
     public void submitTaskFormData(WorkflowTaskEntity task, Map<String, String> data, Principal principal) {
-        taskService.claim(task.getId(), principal.getName());
+        if (principal != null) {
+            taskService.claim(task.getId(), principal.getName());
+        }
         formService.submitTaskFormData(task.getId(), data);
     }
 }
