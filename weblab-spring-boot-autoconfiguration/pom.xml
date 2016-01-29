@@ -27,6 +27,16 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>ucles.weblab</groupId>
             <artifactId>weblab-files</artifactId>
             <optional>true</optional>
@@ -34,6 +44,16 @@
         <dependency>
             <groupId>ucles.weblab</groupId>
             <artifactId>weblab-audit</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>ucles.weblab</groupId>
+            <artifactId>weblab-json-schema</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>ucles.weblab</groupId>
+            <artifactId>weblab-cross-context</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>
