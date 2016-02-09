@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethodSelector;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
-import ucles.weblab.common.schema.webapi.JsonValueFormatHelper;
 import ucles.weblab.common.schema.webapi.MoreFormats;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.schema.webapi.TypedReferenceSchema;
@@ -62,7 +61,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 public class ActionDecorator {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final JsonValueFormatHelper jsonValueFormatHelper = new JsonValueFormatHelper();
     private final SecurityChecker securityChecker;
     private final DeployedWorkflowProcessRepository deployedWorkflowProcessRepository;
     private final WorkflowTaskRepository workflowTaskRepository;
@@ -347,7 +345,7 @@ public class ActionDecorator {
                     } else {
                         fieldSchema = enumSchemaCreator.createEnum(enumValues, schemaFactory::stringSchema);
                     }
-                    fieldSchema.asValueSchemaSchema().setFormat(jsonValueFormatHelper.getCustomJsonValueFormat(MoreFormats.LIST));
+                    fieldSchema.asValueSchemaSchema().setFormat(JsonValueFormat.valueOf(MoreFormats.LIST));
                 } break;
                 case LONG: {
                     fieldSchema = schemaFactory.numberSchema();
