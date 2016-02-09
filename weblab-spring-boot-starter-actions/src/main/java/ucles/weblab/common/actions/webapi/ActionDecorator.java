@@ -345,7 +345,7 @@ public class ActionDecorator {
                     } else {
                         fieldSchema = enumSchemaCreator.createEnum(enumValues, schemaFactory::stringSchema);
                     }
-                    fieldSchema.asValueSchemaSchema().setFormat(JsonValueFormat.valueOf(MoreFormats.LIST));
+                    fieldSchema.asValueTypeSchema().setFormat(JsonValueFormat.valueOf(MoreFormats.LIST));
                 } break;
                 case LONG: {
                     fieldSchema = schemaFactory.numberSchema();
