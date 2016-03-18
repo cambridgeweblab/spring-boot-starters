@@ -20,6 +20,7 @@ import ucles.weblab.common.webapi.resource.ErrorResource;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Formats system exception as error responses which can be interpreted by secure-ajax.js.
@@ -30,7 +31,10 @@ import java.io.StringWriter;
 @ControllerAdvice
 @ResponseBody
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
-
+    
+    @Value("${suppress.errors:true}") 
+    private boolean suppressErrors;
+    
     @ExceptionHandler(ResourceNotFoundException.class)
     protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
         return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getResourceId())),
@@ -100,13 +104,20 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        if (body == null) {
+        
+        if (body == null && !suppressErrors) {
+        
+            //if not suppress errors, then show the whole stack trace to the client 
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
 
             body = new ErrorResource(ex.getMessage(), sw.toString());
+        } else if (body == null && suppressErrors) {            
+            //if suppress errors, then just show the cause's message. 
+            body = new ErrorResource(ex.getMessage(), ex.getCause().getMessage());
         }
+        
         headers.setContentType(MoreMediaTypes.APPLICATION_JSON_UTF8);
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }
