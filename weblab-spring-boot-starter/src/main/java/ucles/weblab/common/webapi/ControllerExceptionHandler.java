@@ -114,8 +114,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
             body = new ErrorResource(ex.getMessage(), sw.toString());
         } else if (body == null && suppressErrors) {            
-            //if suppress errors, then just show the cause's message. 
-            body = new ErrorResource(ex.getMessage(), ex.getCause().getMessage());
+            //if suppress errors, then just show a generic message. 
+            body = new ErrorResource("An exception has occured", "An exception has occured, more details are available in server logs");
         }
         
         headers.setContentType(MoreMediaTypes.APPLICATION_JSON_UTF8);
