@@ -34,7 +34,7 @@ import ucles.weblab.common.xc.service.CrossContextConversionService;
  */
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
+//@ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
 public class ActionCommandAutoConfiguration {
     @Bean
     ActionDecorator actionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator schemaCreator, WorkflowTaskRepository workflowTaskRepository, JsonSchemaFactory schemaFactory, EnumSchemaCreator enumSchemaCreator) {

@@ -21,31 +21,61 @@
     </modules>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Upgrade Spring to 4.1.8 due to vulnerability CVE-2015-5211 RFD Attack in Spring Framework
-             See http://pivotal.io/security/cve-2015-5211 -->
-        <spring.version>4.1.8.RELEASE</spring.version>
-        <!-- The Fowler release gets us Java 8 goodies:
-             see https://spring.io/blog/2015/03/26/what-s-new-in-spring-data-fowler -->
-        <spring-data-releasetrain.version>Fowler-RELEASE</spring-data-releasetrain.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
     </properties>
 
     <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-releasetrain</artifactId>
-                <version>${spring-data-releasetrain.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
+        <dependencies>            
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>            
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jpa</artifactId>
+                <optional>true</optional>
+                <version>${spring-boot.version}</version>
             </dependency>
+            
+            <!--
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <optional>true</optional>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <optional>true</optional>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>            
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>               
+            </dependency>            
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <scope>runtime</scope>
+                <version>1.4.191</version>
+            </dependency>
+            
+            
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>  -->
         </dependencies>
     </dependencyManagement>
 
