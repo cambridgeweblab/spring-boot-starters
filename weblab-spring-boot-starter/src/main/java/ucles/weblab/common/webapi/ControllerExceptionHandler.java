@@ -105,19 +105,20 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
         
-        if (body == null && !suppressErrors) {
-        
-            //if not suppress errors, then show the whole stack trace to the client 
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
+        if (body == null) {
+            if (!suppressErrors) {
+                //if not suppress errors, then show the whole stack trace to the client
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                ex.printStackTrace(pw);
 
-            body = new ErrorResource(ex.getMessage(), sw.toString());
-        } else if (body == null && suppressErrors) {            
-            //if suppress errors, then just show a generic message. 
-            body = new ErrorResource("An exception has occured", "An exception has occured, more details are available in server logs");
+                body = new ErrorResource(ex.getMessage(), sw.toString());
+            } else {
+                //if suppress errors, then just show a generic message.
+                body = new ErrorResource("An exception has occured", "An exception has occured, more details are available in server logs");
+            }
         }
-        
+
         headers.setContentType(MoreMediaTypes.APPLICATION_JSON_UTF8);
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }

@@ -1,5 +1,6 @@
 package ucles.weblab.common.webapi.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,11 +32,13 @@ import ucles.weblab.common.webapi.resource.ErrorResource;
 @ResponseBody
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CommonControllerExceptionHandler extends ControllerExceptionHandler{
-    
+    @Value("${suppress.errors:true}")
+    private boolean suppressErrors;
+
     @ExceptionHandler(value = { DataIntegrityViolationException.class, TransactionSystemException.class })
     protected ResponseEntity<Object> handleDBException(DataIntegrityViolationException e, WebRequest request) {
         
-        return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getMostSpecificCause().getMessage())),
+        return handleExceptionInternal(e, suppressErrors? null : new ErrorResource(e.getMessage(), String.valueOf(e.getMostSpecificCause().getMessage())),
                                       new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
     
