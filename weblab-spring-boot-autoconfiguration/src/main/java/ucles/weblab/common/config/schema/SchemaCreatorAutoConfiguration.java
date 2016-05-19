@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.context.SecurityContextHolder;
+import ucles.weblab.common.schema.webapi.ControllerMethodSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
@@ -47,6 +48,11 @@ public class SchemaCreatorAutoConfiguration {
     @Bean
     EnumSchemaCreator enumSchemaCreator(final JsonSchemaFactory schemaFactory) {
         return new EnumSchemaCreator();
+    }
+
+    @Bean
+    ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper, CrossContextConversionService crossContextConversionService, EnumSchemaCreator enumSchemaCreator) {
+        return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator);
     }
 
     @Bean
