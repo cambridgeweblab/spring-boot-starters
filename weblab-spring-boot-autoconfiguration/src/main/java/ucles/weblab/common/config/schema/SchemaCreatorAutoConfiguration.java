@@ -51,7 +51,9 @@ public class SchemaCreatorAutoConfiguration {
     }
 
     @Bean
-    ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper, CrossContextConversionService crossContextConversionService, EnumSchemaCreator enumSchemaCreator) {
+    ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper, 
+                                                                CrossContextConversionService crossContextConversionService, 
+                                                                EnumSchemaCreator enumSchemaCreator) {
         return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator);
     }
 

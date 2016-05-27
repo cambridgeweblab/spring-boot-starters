@@ -25,6 +25,9 @@ import ucles.weblab.common.xc.service.CrossContextResolverServiceImpl;
 import ucles.weblab.common.xc.service.HandlerMethodInvokingCrossContextResolver;
 
 import javax.persistence.EntityManager;
+import org.springframework.web.client.RestTemplate;
+import ucles.weblab.common.xc.service.RestCrossContextConverter;
+import ucles.weblab.common.xc.service.RestCrossContextResolver;
 
 /**
  * Auto-configuration for the cross-context services.
@@ -76,19 +79,33 @@ public class CrossContextAutoConfiguration {
                 ControllerIntrospectingCrossContextConverter converter, ObjectMapper objectMapper) {
             return new HandlerMethodInvokingCrossContextResolver(converter, objectMapper);
         }
+        
+        @Bean
+        RestCrossContextConverter restCrossContextConverter() {
+            return new RestCrossContextConverter();
+        }
+        
+        @Bean
+        RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter, 
+                                                          RestTemplate restTemplate) {
+            return new RestCrossContextResolver(converter, restTemplate);
+        }
 
         @Bean
         CommandLineRunner registerControllerIntrospectingCrossContextConvertWithConversionService() {
             return args -> {
                 crossContextConversionService.addConverter(controllerIntrospectingCrossContextConverter());
+                crossContextConversionService.addConverter(restCrossContextConverter());
                 logger.info("Enabled controller introspection for @CrossContextMapping.");
             };
         }
 
         @Bean
-        CommandLineRunner registerHandlerMethodInvokingCrossContextResolverWithResolverService(HandlerMethodInvokingCrossContextResolver handlerMethodInvokingCrossContextResolver) {
+        CommandLineRunner registerHandlerMethodInvokingCrossContextResolverWithResolverService(HandlerMethodInvokingCrossContextResolver handlerMethodInvokingCrossContextResolver, 
+                                                                                                RestCrossContextResolver restCrossContextResolver) {
             return args -> {
                 crossContextResolverService.addResolver(handlerMethodInvokingCrossContextResolver);
+                crossContextResolverService.addResolver(restCrossContextResolver);
                 logger.info("Enabled direct-invocation cross-context link resolution.");
             };
         }
