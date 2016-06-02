@@ -86,9 +86,9 @@ public class CrossContextAutoConfiguration {
         }
         
         @Bean
-        RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter, 
-                                                          RestTemplate restTemplate) {
-            return new RestCrossContextResolver(converter, restTemplate);
+        RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter,                                                          
+                                                          ObjectMapper objectMapper) {
+            return new RestCrossContextResolver(converter, new RestTemplate(), objectMapper);
         }
 
         @Bean
