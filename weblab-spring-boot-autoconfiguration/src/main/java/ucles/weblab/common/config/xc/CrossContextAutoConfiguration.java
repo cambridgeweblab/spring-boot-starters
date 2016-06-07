@@ -95,8 +95,9 @@ public class CrossContextAutoConfiguration {
         CommandLineRunner registerControllerIntrospectingCrossContextConvertWithConversionService() {
             return args -> {
                 crossContextConversionService.addConverter(controllerIntrospectingCrossContextConverter());
-                crossContextConversionService.addConverter(restCrossContextConverter());
                 logger.info("Enabled controller introspection for @CrossContextMapping.");
+                crossContextConversionService.addConverter(restCrossContextConverter());
+                logger.info("Enabled explicit mappings for @CrossContextMapping.");
             };
         }
 
@@ -105,8 +106,9 @@ public class CrossContextAutoConfiguration {
                                                                                                 RestCrossContextResolver restCrossContextResolver) {
             return args -> {
                 crossContextResolverService.addResolver(handlerMethodInvokingCrossContextResolver);
-                crossContextResolverService.addResolver(restCrossContextResolver);
                 logger.info("Enabled direct-invocation cross-context link resolution.");
+                crossContextResolverService.addResolver(restCrossContextResolver);
+                logger.info("Enabled external RestTemplate cross-context link resolution.");
             };
         }
     }
