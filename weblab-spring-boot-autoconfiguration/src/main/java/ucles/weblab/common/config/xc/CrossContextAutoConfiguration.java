@@ -25,9 +25,11 @@ import ucles.weblab.common.xc.service.CrossContextResolverServiceImpl;
 import ucles.weblab.common.xc.service.HandlerMethodInvokingCrossContextResolver;
 
 import javax.persistence.EntityManager;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.client.RestTemplate;
 import ucles.weblab.common.xc.service.RestCrossContextConverter;
 import ucles.weblab.common.xc.service.RestCrossContextResolver;
+import ucles.weblab.common.xc.service.RestSettings;
 
 /**
  * Auto-configuration for the cross-context services.
@@ -37,6 +39,7 @@ import ucles.weblab.common.xc.service.RestCrossContextResolver;
 @Configuration
 @ConditionalOnClass({ CrossContextConversionService.class })
 @Import(CrossContextLinkConverters.class)
+@EnableConfigurationProperties(RestSettings.class)
 public class CrossContextAutoConfiguration {
 
     @Bean
@@ -81,8 +84,8 @@ public class CrossContextAutoConfiguration {
         }
         
         @Bean
-        RestCrossContextConverter restCrossContextConverter() {
-            return new RestCrossContextConverter();
+        RestCrossContextConverter restCrossContextConverter(RestSettings restSettings) {
+            return new RestCrossContextConverter(restSettings);
         }
         
         @Bean
@@ -92,11 +95,11 @@ public class CrossContextAutoConfiguration {
         }
 
         @Bean
-        CommandLineRunner registerControllerIntrospectingCrossContextConvertWithConversionService() {
+        CommandLineRunner registerControllerIntrospectingCrossContextConvertWithConversionService(RestSettings restSettings) {
             return args -> {
                 crossContextConversionService.addConverter(controllerIntrospectingCrossContextConverter());
                 logger.info("Enabled controller introspection for @CrossContextMapping.");
-                crossContextConversionService.addConverter(restCrossContextConverter());
+                crossContextConversionService.addConverter(restCrossContextConverter(restSettings));
                 logger.info("Enabled explicit mappings for @CrossContextMapping.");
             };
         }
