@@ -56,7 +56,11 @@
             <artifactId>weblab-cross-context</artifactId>
             <optional>true</optional>
         </dependency>
-        
+        <dependency>
+            <groupId>ucles.weblab</groupId>
+            <artifactId>weblab-forms</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-core</artifactId>
