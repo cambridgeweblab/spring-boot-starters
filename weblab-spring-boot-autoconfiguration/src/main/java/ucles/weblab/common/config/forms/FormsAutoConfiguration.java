@@ -3,7 +3,7 @@ package ucles.weblab.common.config.forms;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import ucles.weblab.common.forms.webapi.FormController;
+//import ucles.weblab.appeals.web.FormController;
 
 /**
  *
@@ -11,7 +11,7 @@ import ucles.weblab.common.forms.webapi.FormController;
  */
 @Configuration
 @AutoConfigureAfter({FormsMongoAutoConfiguration.class})
-@ComponentScan(basePackageClasses = FormController.class)
+//@ComponentScan(basePackageClasses = FormController.class)
 public class FormsAutoConfiguration {
     
 }
