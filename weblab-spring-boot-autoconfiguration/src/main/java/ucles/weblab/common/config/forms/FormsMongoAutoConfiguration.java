@@ -45,13 +45,13 @@ public class FormsMongoAutoConfiguration {
     @ConditionalOnWebApplication
     @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
     @ComponentScan(basePackageClasses = {FormController.class })
-    public static class ActionCommandAutoConfigurationWeb {
+    public static class FormsAutoConfigurationWeb {
        
         @Bean
         public FormResourceAssembler formResourceAssembler(ObjectMapper objectMapper) {
             return new FormResourceAssembler(objectMapper);
         }
-        
+
         @Bean
         public FormDelegate formDelegate(FormRepositoryMongo formRepositoryMongo,
                                         FormResourceAssembler formAssembler,
@@ -59,10 +59,8 @@ public class FormsMongoAutoConfiguration {
                                         ObjectMapper objectMapper) {
             return new FormDelegate(formRepositoryMongo, formAssembler, formFactory, objectMapper);
         }
-        
+    
     }
-    
-    
     
     @Bean
     public FormFactory formFactoryMongo() {
