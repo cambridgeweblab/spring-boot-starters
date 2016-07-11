@@ -21,6 +21,7 @@ import ucles.weblab.common.webapi.resource.ErrorResource;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.springframework.beans.factory.annotation.Value;
+import ucles.weblab.common.webapi.exception.ConflictException;
 
 /**
  * Formats system exception as error responses which can be interpreted by secure-ajax.js.
@@ -50,6 +51,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleReferencedEntityNotFoundException(ReferencedEntityNotFoundException e, WebRequest request) {
         return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+    
+    @ExceptionHandler(value = ConflictException.class)
+    protected ResponseEntity<Object> handleConflictException(ConflictException e, WebRequest request) {
+        return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler
