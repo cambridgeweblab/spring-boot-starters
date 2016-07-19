@@ -13,8 +13,10 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import ucles.weblab.common.webapi.TitledLink;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
@@ -53,10 +55,17 @@ public class ActionAwareWorkflowController {
         ActionableResourceSupport resource = new ActionableResourceSupport();
         // Check if we are now on a user task with a form.
         final List<? extends WorkflowTaskEntity> tasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey);
-        resource.set$actions(tasks.stream()
-                .map(t -> actionDecorator.processWorkflowTaskAction(t, businessKey, parameters))
-                .collect(toList()));
-        return resource.get$actions().isEmpty()? new ResponseEntity<>(resource, HttpStatus.ACCEPTED) : ResponseEntity.ok(resource);
+        
+        //get the actions and set them in the resource
+        tasks.stream()
+             .map(t -> actionDecorator.processWorkflowTaskAction(t, businessKey, parameters))
+             .forEach((action) -> {
+                    //convert this to a spring link to set on the resource
+                    TitledLink tl = ActionableResourceSupport.convert(action);
+                    resource.add(tl);
+              });
+                                     
+        return resource.getLinks().isEmpty() ? new ResponseEntity<>(resource, HttpStatus.ACCEPTED) : ResponseEntity.ok(resource);
     }
 
     @RequestMapping(value = "/instanceKey/{businessKey}/tasks/{taskId}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)

@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import ucles.weblab.common.webapi.TitledLink;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -131,11 +132,13 @@ public class ActionDecorator {
         }
         
                
-        if (!actions.isEmpty()) {
-            if (resource.get$actions() != null) { // Preserve existing actions on a resource
-                actions.addAll(resource.get$actions());
-            }
-            resource.set$actions(actions);
+        if (!actions.isEmpty()) {            
+            actions.stream()
+                .forEach((action) -> {
+                    //convert this to a spring link to set on the resource
+                    TitledLink tl = ActionableResourceSupport.convert(action);
+                    resource.add(tl);
+            });
         }
     }
 

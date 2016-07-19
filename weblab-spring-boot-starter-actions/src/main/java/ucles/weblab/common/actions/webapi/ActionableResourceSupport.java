@@ -6,8 +6,7 @@ import org.springframework.hateoas.ResourceSupport;
 import ucles.weblab.common.schema.webapi.JsonSchemaIgnore;
 
 import java.net.URI;
-import java.util.List;
-import javax.xml.bind.annotation.XmlTransient;
+import ucles.weblab.common.webapi.TitledLink;
 
 /**
  * Base class for DTOs to collect actions.
@@ -15,17 +14,13 @@ import javax.xml.bind.annotation.XmlTransient;
  * @since 03/11/15
  */
 public class ActionableResourceSupport extends ResourceSupport {
-    @XmlTransient
-    private List<Action> $actions;
-
-    public List<Action> get$actions() {
-        return $actions;
+    
+    public static TitledLink convert(Action action) {
+        
+        TitledLink tl = new TitledLink(action.getHref(), "action:" + action.getRel(), action.getTitle(), action.getMethod());
+        return tl;
     }
-
-    public void set$actions(List<Action> actions) {
-        this.$actions = actions;
-    }
-
+    
     @JsonIgnoreProperties({"jsonSchema"}) // LinkDescriptionObject incorrectly annotates jsonSchema.
     @JsonSchemaIgnore
     public static class Action extends LinkDescriptionObject {
