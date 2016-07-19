@@ -18,7 +18,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -215,7 +215,7 @@ public class ActionDecorator {
                 }
             } else if (parameter.getAnnotation(RequestBody.class) != null && ResourceSupport.class.isAssignableFrom(parameter.getType())) {
                 log.debug("Skipping @RequestBody parameter " + i + " ");
-            } else if (parameter.getAnnotation(AuthenticationPrincipal.class) != null || Principal.class.isAssignableFrom(parameter.getType()) || Authentication.class.isAssignableFrom(parameter.getType())) {
+            } else if (parameter.getAnnotation(AuthenticationPrincipal.class) != null || parameter.getAnnotation(org.springframework.security.web.bind.annotation.AuthenticationPrincipal.class) != null || Principal.class.isAssignableFrom(parameter.getType()) || Authentication.class.isAssignableFrom(parameter.getType())) {
                 log.debug("Skipping security parameter " + i + " [" + parameter + "]");
             } else if (parameter.getAnnotation(RequestBody.class) == null || !ResourceSupport.class.isAssignableFrom(parameter.getType())) {
                 log.error("Controller method " + method.toString() + " parameter " + i + " [" + parameter + "] is not a @PathVariable or a @RequestBody ResourceSupport");
