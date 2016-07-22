@@ -17,7 +17,7 @@ public class ActionableResourceSupport extends ResourceSupport {
     
     public static TitledLink convert(Action action) {
         
-        TitledLink tl = new TitledLink(action.getHref(), "action:" + action.getRel(), action.getTitle(), action.getMethod());
+        TitledLink tl = new TitledLink(action.getHref(), "action:" + action.getRel(), action.getTitle(), action.getMethod(), action.getDescription(), action.getSchema());
         return tl;
     }
     
