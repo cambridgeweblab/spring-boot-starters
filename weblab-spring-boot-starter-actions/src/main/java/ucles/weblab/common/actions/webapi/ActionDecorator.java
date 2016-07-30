@@ -192,8 +192,11 @@ public class ActionDecorator implements BeanFactoryAware {
         }
 
         final RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-        // This linkTo() method doesn't handle trailing slashes on URLs very well
         URI href = linkTo(actionCommand.controller(), method, arguments).toUriComponentsBuilder().replaceQuery(null).build(true).toUri();
+        // This linkTo() method doesn't handle trailing slashes on URLs very well, so fix it.
+        if (requestMapping.path()[0].endsWith("/")) {
+            href = URI.create(href.toString() + "/");
+        }
         final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
                 href,
                 actionCommand.title(),
