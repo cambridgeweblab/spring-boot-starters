@@ -9,6 +9,10 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.common.TemplateParserContext;
@@ -65,7 +69,7 @@ import ucles.weblab.common.webapi.TitledLink;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-public class ActionDecorator {
+public class ActionDecorator implements BeanFactoryAware {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final SecurityChecker securityChecker;
     private final DeployedWorkflowProcessRepository deployedWorkflowProcessRepository;
@@ -74,6 +78,7 @@ public class ActionDecorator {
     private final ResourceSchemaCreator resourceSchemaCreator;
     private final EnumSchemaCreator enumSchemaCreator;
     private final JsonSchemaFactory schemaFactory;
+    private BeanFactory beanFactory;
 
     public ActionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator resourceSchemaCreator, EnumSchemaCreator enumSchemaCreator, final JsonSchemaFactory schemaFactory) {
         this.securityChecker = securityChecker;
@@ -83,6 +88,11 @@ public class ActionDecorator {
         this.resourceSchemaCreator = resourceSchemaCreator;
         this.enumSchemaCreator = enumSchemaCreator;
         this.schemaFactory = schemaFactory;
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
     }
 
     void processResource(ActionableResourceSupport resource) {
@@ -153,6 +163,7 @@ public class ActionDecorator {
         for (ActionParameterNameValue v : workFlowVariables) {
             Expression expression = new SpelExpressionParser().parseExpression(v.value(), new TemplateParserContext());
             StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
+            evalContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
             Object value = expression.getValue(evalContext);                            
             parameters.put(v.name(), value.toString());
         }
@@ -392,6 +403,7 @@ public class ActionDecorator {
         final Expression expression = new SpelExpressionParser().parseExpression(actionCommand.condition(), new TemplateParserContext());
 
         StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
+        evalContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
         return expression.getValue(evalContext, Boolean.class);
     }
 
@@ -399,6 +411,7 @@ public class ActionDecorator {
         final Expression expression = new SpelExpressionParser().parseExpression(parameter.value(), new TemplateParserContext());
 
         StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
+        evalContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
         return expression.getValue(evalContext);
     }
 
