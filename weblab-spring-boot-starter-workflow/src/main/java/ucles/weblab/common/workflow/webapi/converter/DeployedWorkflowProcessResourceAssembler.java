@@ -26,13 +26,9 @@ public class DeployedWorkflowProcessResourceAssembler implements ResourceAssembl
 
     @Override
     public WorkflowProcessDefResource toResource(DeployedWorkflowProcessEntity entity) {
-        WorkflowProcessDefResource resource = new WorkflowProcessDefResource(entity.getKey(), entity.getName(),
+        WorkflowProcessDefResource resource = new WorkflowProcessDefResource(entity.getId(), entity.getKey(), entity.getName(),
                 entity.getVersion(), entity.deployedInstant());
 
-        resource.add(editableWorkflowProcessRepository.findOneByKey(entity.getKey())
-                .map(model -> linkTo(methodOn(WorkflowController.class).returnModelForProcess(model.getId())))
-                .orElse(linkTo(methodOn(WorkflowController.class).createAndReturnModelForProcess(entity.getId())))
-                .withRel(DESCRIBED_BY.rel()));
         resource.add(linkTo(methodOn(WorkflowController.class).updateModelForProcess(entity.getId(), resource)).withSelfRel());
         resource.add(new Link(linkTo(methodOn(WorkflowController.class).returnBpmn20ForProcessDefinition(entity.getId()))
                 .toUriComponentsBuilder().toUriString() + ".xml", LinkRelation.CANONICAL.rel()));

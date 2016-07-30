@@ -9,6 +9,7 @@ import java.time.Instant;
  *
  * @since 17/07/15
  */
+// TODO: add @ActionCommand to deploy the model
 public class WorkflowModelResource extends ResourceSupport {
     private String key;
     private String name;

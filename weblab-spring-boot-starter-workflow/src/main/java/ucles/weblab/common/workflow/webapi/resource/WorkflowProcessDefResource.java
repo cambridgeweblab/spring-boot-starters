@@ -1,6 +1,10 @@
 package ucles.weblab.common.workflow.webapi.resource;
 
-import org.springframework.hateoas.ResourceSupport;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import ucles.weblab.common.webapi.ActionCommand;
+import ucles.weblab.common.webapi.ActionParameter;
+import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
+import ucles.weblab.common.workflow.webapi.WorkflowController;
 
 import java.time.Instant;
 
@@ -9,7 +13,18 @@ import java.time.Instant;
  *
  * @since 17/07/15
  */
-public class WorkflowProcessDefResource extends ResourceSupport {
+@ActionCommand(
+        name = "create-model",
+        title = "Create as Model",
+        description = "Copy the deployed workflow process to an editable workflow model",
+        condition = "#{!@processModelRepository.findOneByKey(key).present}",
+        controller = WorkflowController.class,
+        method = "createAndReturnModelForProcess",
+        pathVariables = { @ActionParameter("#{processId}") }
+)
+public class WorkflowProcessDefResource extends ActionableResourceSupport {
+    @JsonIgnore
+    private String processId;
     private String key;
     private String name;
     private int version;
@@ -18,11 +33,16 @@ public class WorkflowProcessDefResource extends ResourceSupport {
     protected WorkflowProcessDefResource() { // For Jackson
     }
 
-    public WorkflowProcessDefResource(String key, String name, int version, Instant deployInstant) {
+    public WorkflowProcessDefResource(String id, String key, String name, int version, Instant deployInstant) {
+        this.processId = id;
         this.key = key;
         this.name = name;
         this.version = version;
         this.deployInstant = deployInstant;
+    }
+
+    public String getProcessId() {
+        return processId;
     }
 
     public String getName() {
