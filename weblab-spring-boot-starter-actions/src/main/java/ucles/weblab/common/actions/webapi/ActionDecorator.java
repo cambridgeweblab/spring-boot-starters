@@ -100,17 +100,17 @@ public class ActionDecorator {
                 
         for (ActionCommand actionCommand : actionCommands) {
             if (actionCommand.authorization().isEmpty() || securityChecker.check(actionCommand.authorization())) {
-                final URI businessKey;
-                if (actionCommand.createNewKey()) {
-                    businessKey = URI.create(UUID.randomUUID().toString());
-                } else {
-                    businessKey = crossContextConversionService.asUrn(URI.create(resource.getId().getHref()));
-                }
-                
                 if (actionCommand.condition().isEmpty() || checkCondition(actionCommand, resource)) {
                     log.info("Processing action command '" + actionCommand.name() + "' on resource " + resource.toString());
                      
                     if (!actionCommand.message().isEmpty()) {
+                        final URI businessKey;
+                        if (actionCommand.createNewKey()) {
+                            businessKey = URI.create(UUID.randomUUID().toString());
+                        } else {
+                            businessKey = crossContextConversionService.asUrn(URI.create(resource.getId().getHref()));
+                        }
+
                         processWorkflowAction(resource, actionCommand, businessKey).ifPresent(actions::add);
 
                         final List<? extends WorkflowTaskEntity> tasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey.toString());
