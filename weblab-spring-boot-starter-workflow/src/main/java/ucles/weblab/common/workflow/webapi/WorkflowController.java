@@ -171,8 +171,9 @@ public class WorkflowController {
     }
 
     @RequestMapping(value = "/models/{modelId}", method = DELETE)
-    public void deleteExistingModel(@PathVariable String modelId) {
+    public ResponseEntity<Void> deleteExistingModel(@PathVariable String modelId) {
         editableWorkflowProcessRepository.deleteById(modelId);
+        return ResponseEntity.ok(null);
     }
 
     @RequestMapping(value = "/processes/{processId}/", method = PUT, consumes = APPLICATION_JSON_UTF8_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
