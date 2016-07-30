@@ -8,6 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import ucles.weblab.common.webapi.ActionCommand;
+import ucles.weblab.common.webapi.ActionCommands;
+import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.webapi.resource.ResourceListWrapper;
 
 import java.util.Set;
@@ -41,15 +44,15 @@ public class ActionDecoratorAspect {
     private void inRestController() {
     }
 
-    @Pointcut("execution(public ActionableResourceSupport+ *(..))")
+    @Pointcut("execution(public ucles.weblab.common.webapi.resource.ActionableResourceSupport+ *(..))")
     private void publicMethodReturningActionableResource() {
     }
 
-    @Pointcut("execution(public org.springframework.http.ResponseEntity<ActionableResourceSupport+> *(..))")
+    @Pointcut("execution(public org.springframework.http.ResponseEntity<ucles.weblab.common.webapi.resource.ActionableResourceSupport+> *(..))")
     private void publicMethodReturningActionableResourceResponseEntity() {
     }
 
-    @Pointcut("execution(public ucles.weblab.common.webapi.resource.ResourceListWrapper<ActionableResourceSupport+> *(..))")
+    @Pointcut("execution(public ucles.weblab.common.webapi.resource.ResourceListWrapper<ucles.weblab.common.webapi.resource.ActionableResourceSupport+> *(..))")
     private void publicMethodReturningActionableResources() {
     }
 

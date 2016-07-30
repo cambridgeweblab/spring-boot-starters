@@ -8,17 +8,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
+import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.WorkflowService;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import ucles.weblab.common.webapi.TitledLink;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 

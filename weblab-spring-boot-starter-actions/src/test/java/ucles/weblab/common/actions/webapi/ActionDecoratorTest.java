@@ -14,6 +14,7 @@ import ucles.weblab.common.test.webapi.WebTestSupport;
 import ucles.weblab.common.webapi.HateoasConverterRegistrar;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
+import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
