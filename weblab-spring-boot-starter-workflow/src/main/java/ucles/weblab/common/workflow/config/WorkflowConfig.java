@@ -5,8 +5,6 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.rest.editor.main.StencilsetRestResource;
-import org.activiti.rest.editor.model.ModelEditorJsonRestResource;
 import org.activiti.spring.boot.DataSourceProcessEngineAutoConfiguration;
 import org.activiti.spring.boot.JpaProcessEngineAutoConfiguration;
 import org.springframework.boot.CommandLineRunner;
@@ -43,7 +41,7 @@ import java.util.UUID;
  */
 @Configuration
 @AutoConfigureAfter({JacksonAutoConfiguration.class, JpaProcessEngineAutoConfiguration.class, DataSourceProcessEngineAutoConfiguration.class})
-@ComponentScan(basePackageClasses = {StencilsetRestResource.class, ModelEditorJsonRestResource.class, WorkflowController.class})
+@ComponentScan(basePackageClasses = {WorkflowController.class})
 @Import({WorkflowConverters.class, WorkflowBuilders.class})
 public class WorkflowConfig {
 
