@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.web.bind.annotation.RestController;
+import ucles.weblab.common.actions.webapi.PayPalFormKeyHandler;
 import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.security.SecurityChecker;
@@ -37,8 +38,8 @@ import ucles.weblab.common.xc.service.CrossContextConversionService;
 @ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
 public class ActionCommandAutoConfiguration {
     @Bean
-    ActionDecorator actionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator schemaCreator, WorkflowTaskRepository workflowTaskRepository, JsonSchemaFactory schemaFactory, EnumSchemaCreator enumSchemaCreator) {
-        return new ActionDecorator(securityChecker, deployedWorkflowProcessRepository, workflowTaskRepository, crossContextConversionService, schemaCreator, enumSchemaCreator, schemaFactory);
+    ActionDecorator actionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator schemaCreator, WorkflowTaskRepository workflowTaskRepository, JsonSchemaFactory schemaFactory, EnumSchemaCreator enumSchemaCreator, PayPalFormKeyHandler payPalFormKeyHandler) {
+        return new ActionDecorator(securityChecker, deployedWorkflowProcessRepository, workflowTaskRepository, crossContextConversionService, schemaCreator, enumSchemaCreator, schemaFactory, payPalFormKeyHandler);
     }
 
     @Bean

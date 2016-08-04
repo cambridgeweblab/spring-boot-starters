@@ -79,8 +79,9 @@ public class ActionDecorator implements BeanFactoryAware {
     private final EnumSchemaCreator enumSchemaCreator;
     private final JsonSchemaFactory schemaFactory;
     private BeanFactory beanFactory;
+    private PayPalFormKeyHandler payPalFormKeyHandler;
 
-    public ActionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator resourceSchemaCreator, EnumSchemaCreator enumSchemaCreator, final JsonSchemaFactory schemaFactory) {
+    public ActionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator resourceSchemaCreator, EnumSchemaCreator enumSchemaCreator, final JsonSchemaFactory schemaFactory, PayPalFormKeyHandler payPalFormKeyHandler) {
         this.securityChecker = securityChecker;
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
         this.workflowTaskRepository = workflowTaskRepository;
@@ -88,6 +89,7 @@ public class ActionDecorator implements BeanFactoryAware {
         this.resourceSchemaCreator = resourceSchemaCreator;
         this.enumSchemaCreator = enumSchemaCreator;
         this.schemaFactory = schemaFactory;
+        this.payPalFormKeyHandler = payPalFormKeyHandler;
     }
 
     @Override
@@ -315,6 +317,10 @@ public class ActionDecorator implements BeanFactoryAware {
                             log.warn("Workflow defined schema form key '" + formKey + "' which did not match a resource on the classpath");
                         }
                         break;
+                    case "paypal":
+                        ActionableResourceSupport.Action action = payPalFormKeyHandler.createAction(businessKey, task.getId());
+                        return action;
+
                     default:
                         log.warn("Workflow defined schema form key with unknown sub-type: " + formKey);
 
