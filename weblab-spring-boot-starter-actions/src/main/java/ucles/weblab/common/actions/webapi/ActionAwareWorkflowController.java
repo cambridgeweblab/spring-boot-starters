@@ -1,5 +1,9 @@
 package ucles.weblab.common.actions.webapi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +34,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 @RequestMapping("/api/action/workflow")
 public class ActionAwareWorkflowController {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final WorkflowService workflowService;
     private final WorkflowTaskRepository workflowTaskRepository;
     private final ActionDecorator actionDecorator;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public ActionAwareWorkflowController(WorkflowService workflowService, WorkflowTaskRepository workflowTaskRepository, ActionDecorator actionDecorator) {
@@ -63,6 +70,12 @@ public class ActionAwareWorkflowController {
                     TitledLink tl = ActionableResourceSupport.convert(action);
                     resource.add(tl);
               });
+
+        try {
+            log.info("resource = " +  objectMapper.writeValueAsString(resource));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
                                      
         return resource.getLinks().isEmpty() ? new ResponseEntity<>(resource, HttpStatus.ACCEPTED) : ResponseEntity.ok(resource);
     }

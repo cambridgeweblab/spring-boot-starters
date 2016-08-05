@@ -24,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,6 +71,7 @@ import ucles.weblab.common.webapi.TitledLink;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+@Component("actionDecorator")
 public class ActionDecorator implements BeanFactoryAware {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final SecurityChecker securityChecker;
@@ -324,7 +326,7 @@ public class ActionDecorator implements BeanFactoryAware {
                         ActionableResourceSupport.Action action = payPalFormKeyHandler.createAction(task);
 
                         try {
-                            log.debug("schema/; " +  objectMapper.writeValueAsString(action));
+                            log.info("schema = " +  objectMapper.writeValueAsString(action));
                         } catch (JsonProcessingException e) {
                             e.printStackTrace();
                         }
