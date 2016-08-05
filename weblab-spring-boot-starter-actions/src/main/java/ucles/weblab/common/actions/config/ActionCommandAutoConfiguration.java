@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
@@ -27,6 +28,8 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
+import java.util.Optional;
+
 /**
  * Configure automatic processing of {@link ActionCommands @ActionCommands} and
  * {@link ActionCommand @ActionCommand} annotations.
@@ -37,9 +40,47 @@ import ucles.weblab.common.xc.service.CrossContextConversionService;
 @ConditionalOnWebApplication
 @ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
 public class ActionCommandAutoConfiguration {
+
+
+    @ConditionalOnBean(PayPalFormKeyHandler.class)
     @Bean
-    ActionDecorator actionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator schemaCreator, WorkflowTaskRepository workflowTaskRepository, JsonSchemaFactory schemaFactory, EnumSchemaCreator enumSchemaCreator, PayPalFormKeyHandler payPalFormKeyHandler) {
-        return new ActionDecorator(securityChecker, deployedWorkflowProcessRepository, workflowTaskRepository, crossContextConversionService, schemaCreator, enumSchemaCreator, schemaFactory, payPalFormKeyHandler);
+    ActionDecorator actionDecorator(SecurityChecker securityChecker,
+                                    DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
+                                    CrossContextConversionService crossContextConversionService,
+                                    ResourceSchemaCreator schemaCreator,
+                                    WorkflowTaskRepository workflowTaskRepository,
+                                    JsonSchemaFactory schemaFactory,
+                                    EnumSchemaCreator enumSchemaCreator,
+                                    PayPalFormKeyHandler payPalFormKeyHandler) {
+
+        return new ActionDecorator(securityChecker,
+                deployedWorkflowProcessRepository,
+                workflowTaskRepository,
+                crossContextConversionService,
+                schemaCreator,
+                enumSchemaCreator,
+                schemaFactory,
+                Optional.of(payPalFormKeyHandler));
+    }
+
+    @ConditionalOnMissingBean(PayPalFormKeyHandler.class)
+    @Bean
+    ActionDecorator actionDecorator(SecurityChecker securityChecker,
+                                    DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
+                                    CrossContextConversionService crossContextConversionService,
+                                    ResourceSchemaCreator schemaCreator,
+                                    WorkflowTaskRepository workflowTaskRepository,
+                                    JsonSchemaFactory schemaFactory,
+                                    EnumSchemaCreator enumSchemaCreator) {
+
+        return new ActionDecorator(securityChecker,
+                deployedWorkflowProcessRepository,
+                workflowTaskRepository,
+                crossContextConversionService,
+                schemaCreator,
+                enumSchemaCreator,
+                schemaFactory,
+                Optional.empty());
     }
 
     @Bean

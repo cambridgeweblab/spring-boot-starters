@@ -82,11 +82,19 @@ public class ActionDecorator implements BeanFactoryAware {
     private final EnumSchemaCreator enumSchemaCreator;
     private final JsonSchemaFactory schemaFactory;
     private BeanFactory beanFactory;
-    private PayPalFormKeyHandler payPalFormKeyHandler;
+    private Optional<PayPalFormKeyHandler> payPalFormKeyHandler;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public ActionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator resourceSchemaCreator, EnumSchemaCreator enumSchemaCreator, final JsonSchemaFactory schemaFactory, PayPalFormKeyHandler payPalFormKeyHandler) {
+    public ActionDecorator(SecurityChecker securityChecker,
+                           DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
+                           WorkflowTaskRepository workflowTaskRepository,
+                           CrossContextConversionService crossContextConversionService,
+                           ResourceSchemaCreator resourceSchemaCreator,
+                           EnumSchemaCreator enumSchemaCreator,
+                           final JsonSchemaFactory schemaFactory,
+                           Optional<PayPalFormKeyHandler> payPalFormKeyHandler) {
+
         this.securityChecker = securityChecker;
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
         this.workflowTaskRepository = workflowTaskRepository;
@@ -323,12 +331,14 @@ public class ActionDecorator implements BeanFactoryAware {
                         }
                         break;
                     case "paypal":
-                        ActionableResourceSupport.Action action = payPalFormKeyHandler.createAction(task);
+                        payPalFormKeyHandler.orElseThrow(() -> new IllegalArgumentException(formKey + " form key is found but no handler implementing: " +  PayPalFormKeyHandler.class));
+
+                        ActionableResourceSupport.Action action = payPalFormKeyHandler.get().createAction(task);
 
                         try {
-                            log.info("schema = " +  objectMapper.writeValueAsString(action));
+                            log.debug("schema = " + objectMapper.writeValueAsString(action));
                         } catch (JsonProcessingException e) {
-                            e.printStackTrace();
+                            log.warn("Ignoring exception while writing schema to debug log", e.getMessage());
                         }
 
                         return action;

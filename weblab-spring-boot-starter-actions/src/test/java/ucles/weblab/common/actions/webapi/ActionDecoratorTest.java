@@ -60,9 +60,6 @@ public class ActionDecoratorTest {
     @Mock
     EnumSchemaCreator enumSchemaCreator;
 
-    @Mock
-    PayPalFormKeyHandler payPalFormKeyHandler;
-
     ActionDecorator actionDecorator;
 
     @BeforeClass
@@ -73,7 +70,7 @@ public class ActionDecoratorTest {
     @Before
     public void setUp() throws Exception {
         actionDecorator = new ActionDecorator(securityChecker, deployedWorkflowProcessRepository, workflowTaskRepository,
-                crossContextConversionService, resourceSchemaCreator, enumSchemaCreator, schemaProvider, payPalFormKeyHandler);
+                crossContextConversionService, resourceSchemaCreator, enumSchemaCreator, schemaProvider, Optional.empty());
         WebTestSupport.setUpRequestContext();
     }
 
