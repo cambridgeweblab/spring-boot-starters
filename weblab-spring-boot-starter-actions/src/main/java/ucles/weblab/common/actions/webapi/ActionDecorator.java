@@ -1,5 +1,6 @@
 package ucles.weblab.common.actions.webapi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -80,6 +81,8 @@ public class ActionDecorator implements BeanFactoryAware {
     private final JsonSchemaFactory schemaFactory;
     private BeanFactory beanFactory;
     private PayPalFormKeyHandler payPalFormKeyHandler;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public ActionDecorator(SecurityChecker securityChecker, DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, CrossContextConversionService crossContextConversionService, ResourceSchemaCreator resourceSchemaCreator, EnumSchemaCreator enumSchemaCreator, final JsonSchemaFactory schemaFactory, PayPalFormKeyHandler payPalFormKeyHandler) {
         this.securityChecker = securityChecker;
@@ -318,7 +321,14 @@ public class ActionDecorator implements BeanFactoryAware {
                         }
                         break;
                     case "paypal":
-                        ActionableResourceSupport.Action action = payPalFormKeyHandler.createAction(businessKey, task.getId());
+                        ActionableResourceSupport.Action action = payPalFormKeyHandler.createAction(task);
+
+                        try {
+                            log.debug("schema/; " +  objectMapper.writeValueAsString(action));
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+
                         return action;
 
                     default:
