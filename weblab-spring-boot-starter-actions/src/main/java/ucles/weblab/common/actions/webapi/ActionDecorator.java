@@ -71,7 +71,6 @@ import ucles.weblab.common.webapi.TitledLink;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-@Component("actionDecorator")
 public class ActionDecorator implements BeanFactoryAware {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final SecurityChecker securityChecker;
@@ -336,7 +335,9 @@ public class ActionDecorator implements BeanFactoryAware {
                         ActionableResourceSupport.Action action = payPalFormKeyHandler.get().createAction(task);
 
                         try {
-                            log.debug("schema = " + objectMapper.writeValueAsString(action));
+                            if (log.isDebugEnabled()){
+                                log.debug("schema = " + objectMapper.writeValueAsString(action));
+                            }
                         } catch (JsonProcessingException e) {
                             log.warn("Ignoring exception while writing schema to debug log", e.getMessage());
                         }
