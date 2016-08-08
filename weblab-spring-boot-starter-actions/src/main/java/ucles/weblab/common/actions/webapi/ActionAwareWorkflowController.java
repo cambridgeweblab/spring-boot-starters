@@ -72,7 +72,7 @@ public class ActionAwareWorkflowController {
               });
 
         try {
-            log.info("resource = " +  objectMapper.writeValueAsString(resource));
+            log.debug("resource = " +  objectMapper.writeValueAsString(resource));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
