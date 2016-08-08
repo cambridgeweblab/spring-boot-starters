@@ -38,7 +38,7 @@ import java.util.Optional;
  */
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
+//@ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
 public class ActionCommandAutoConfiguration {
 
 
