@@ -29,6 +29,7 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
 import java.util.Optional;
+import ucles.weblab.common.xc.service.CrossContextResolverService;
 
 /**
  * Configure automatic processing of {@link ActionCommands @ActionCommands} and
@@ -42,7 +43,6 @@ import java.util.Optional;
 public class ActionCommandAutoConfiguration {
 
 
-    @ConditionalOnBean(PayPalFormKeyHandler.class)
     @Bean
     ActionDecorator actionDecorator(SecurityChecker securityChecker,
                                     DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
@@ -51,7 +51,8 @@ public class ActionCommandAutoConfiguration {
                                     WorkflowTaskRepository workflowTaskRepository,
                                     JsonSchemaFactory schemaFactory,
                                     EnumSchemaCreator enumSchemaCreator,
-                                    PayPalFormKeyHandler payPalFormKeyHandler) {
+                                    Optional<PayPalFormKeyHandler> payPalFormKeyHandler,
+                                    CrossContextResolverService crossContextResolverService) {
 
         return new ActionDecorator(securityChecker,
                 deployedWorkflowProcessRepository,
@@ -60,27 +61,8 @@ public class ActionCommandAutoConfiguration {
                 schemaCreator,
                 enumSchemaCreator,
                 schemaFactory,
-                Optional.of(payPalFormKeyHandler));
-    }
-
-    @ConditionalOnMissingBean(PayPalFormKeyHandler.class)
-    @Bean
-    ActionDecorator actionDecorator(SecurityChecker securityChecker,
-                                    DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
-                                    CrossContextConversionService crossContextConversionService,
-                                    ResourceSchemaCreator schemaCreator,
-                                    WorkflowTaskRepository workflowTaskRepository,
-                                    JsonSchemaFactory schemaFactory,
-                                    EnumSchemaCreator enumSchemaCreator) {
-
-        return new ActionDecorator(securityChecker,
-                deployedWorkflowProcessRepository,
-                workflowTaskRepository,
-                crossContextConversionService,
-                schemaCreator,
-                enumSchemaCreator,
-                schemaFactory,
-                Optional.empty());
+                payPalFormKeyHandler,
+                crossContextResolverService);
     }
 
     @Bean
