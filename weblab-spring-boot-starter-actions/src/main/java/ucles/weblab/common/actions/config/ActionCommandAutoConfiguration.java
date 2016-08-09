@@ -3,9 +3,7 @@ package ucles.weblab.common.actions.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
@@ -29,7 +27,6 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
 import java.util.Optional;
-import ucles.weblab.common.xc.service.CrossContextResolverService;
 
 /**
  * Configure automatic processing of {@link ActionCommands @ActionCommands} and
@@ -51,8 +48,7 @@ public class ActionCommandAutoConfiguration {
                                     WorkflowTaskRepository workflowTaskRepository,
                                     JsonSchemaFactory schemaFactory,
                                     EnumSchemaCreator enumSchemaCreator,
-                                    Optional<PayPalFormKeyHandler> payPalFormKeyHandler,
-                                    CrossContextResolverService crossContextResolverService) {
+                                    Optional<PayPalFormKeyHandler> payPalFormKeyHandler) {
 
         return new ActionDecorator(securityChecker,
                 deployedWorkflowProcessRepository,
@@ -61,8 +57,7 @@ public class ActionCommandAutoConfiguration {
                 schemaCreator,
                 enumSchemaCreator,
                 schemaFactory,
-                payPalFormKeyHandler,
-                crossContextResolverService);
+                payPalFormKeyHandler);
     }
 
     @Bean

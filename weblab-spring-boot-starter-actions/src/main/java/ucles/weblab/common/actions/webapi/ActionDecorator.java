@@ -1,6 +1,7 @@
 package ucles.weblab.common.actions.webapi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -66,6 +67,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import ucles.weblab.common.webapi.TitledLink;
+import ucles.weblab.common.xc.domain.CrossContextLink;
+import ucles.weblab.common.xc.service.CrossContextResolverService;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -79,9 +82,9 @@ public class ActionDecorator implements BeanFactoryAware {
     private final ResourceSchemaCreator resourceSchemaCreator;
     private final EnumSchemaCreator enumSchemaCreator;
     private final JsonSchemaFactory schemaFactory;
+    
     private BeanFactory beanFactory;
-    private Optional<PayPalFormKeyHandler> payPalFormKeyHandler;
-
+    private Optional<PayPalFormKeyHandler> payPalFormKeyHandler;    
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public ActionDecorator(SecurityChecker securityChecker,
@@ -328,24 +331,24 @@ public class ActionDecorator implements BeanFactoryAware {
                             log.warn("Workflow defined schema form key '" + formKey + "' which did not match a resource on the classpath");
                         }
                         break;
-                    case "paypal":
+                    case "paypal":                        
                         payPalFormKeyHandler.orElseThrow(() -> new IllegalArgumentException(formKey + " form key is found but no handler implementing: " +  PayPalFormKeyHandler.class));
 
-                        ActionableResourceSupport.Action action = payPalFormKeyHandler.get().createAction(task);
-
-                        try {
-                            if (log.isDebugEnabled()){
-                                log.debug("schema = " + objectMapper.writeValueAsString(action));
+                        ActionableResourceSupport.Action action = payPalFormKeyHandler.get().createAction(task, parameters);
+                        if (action != null) {
+                            try {
+                                if (log.isDebugEnabled()){
+                                    log.debug("schema = " + objectMapper.writeValueAsString(action));
+                                }
+                            } catch (JsonProcessingException e) {
+                                log.warn("Ignoring exception while writing schema to debug log", e.getMessage());
                             }
-                        } catch (JsonProcessingException e) {
-                            log.warn("Ignoring exception while writing schema to debug log", e.getMessage());
+                            return action;
+                        } else {
+                            break;
                         }
-
-                        return action;
-
                     default:
                         log.warn("Workflow defined schema form key with unknown sub-type: " + formKey);
-
                 }
             } else {
                 log.warn("Workflow defined unknown form key: " + formKey);
