@@ -10,15 +10,13 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.web.bind.annotation.RestController;
-import ucles.weblab.common.actions.webapi.PayPalFormKeyHandler;
+import ucles.weblab.common.actions.webapi.*;
 import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.security.SecurityChecker;
-import ucles.weblab.common.actions.webapi.ActionAwareWorkflowController;
-import ucles.weblab.common.actions.webapi.ActionDecorator;
-import ucles.weblab.common.actions.webapi.ActionDecoratorAspect;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
@@ -26,6 +24,7 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -35,7 +34,6 @@ import java.util.Optional;
  * @since 03/11/15
  */
 @Configuration
-@ConditionalOnWebApplication
 //@ConditionalOnBean(DeployedWorkflowProcessRepository.class) // TODO: make actions available without workflow...
 public class ActionCommandAutoConfiguration {
 
@@ -46,18 +44,33 @@ public class ActionCommandAutoConfiguration {
                                     CrossContextConversionService crossContextConversionService,
                                     ResourceSchemaCreator schemaCreator,
                                     WorkflowTaskRepository workflowTaskRepository,
-                                    JsonSchemaFactory schemaFactory,
-                                    EnumSchemaCreator enumSchemaCreator,
-                                    Optional<PayPalFormKeyHandler> payPalFormKeyHandler) {
+                                    FormFieldSchemaCreator formFieldSchemaCreator,
+                                    Optional<List<FormKeyHandler>> formKeyHandlers) {
 
         return new ActionDecorator(securityChecker,
                 deployedWorkflowProcessRepository,
                 workflowTaskRepository,
                 crossContextConversionService,
                 schemaCreator,
-                enumSchemaCreator,
-                schemaFactory,
-                payPalFormKeyHandler);
+                formFieldSchemaCreator,
+                formKeyHandlers);
+    }
+
+    @Bean
+    FormKeyHandler defaultFormKeyHandler(FormFieldSchemaCreator formFieldSchemaCreator) {
+        return new DefaultFormKeyHandler(formFieldSchemaCreator);
+    }
+
+    @Bean
+    FormKeyHandler schemaFormKeyHandler(ResourceSchemaCreator resourceSchemaCreator) {
+        return new SchemaFormKeyHandler(resourceSchemaCreator);
+    }
+
+    @Bean
+    FormFieldSchemaCreator formFieldSchemaCreator(CrossContextConversionService crossContextConversionService,
+                                                  JsonSchemaFactory schemaFactory,
+                                                  EnumSchemaCreator enumSchemaCreator) {
+        return new FormFieldSchemaCreator(crossContextConversionService, schemaFactory, enumSchemaCreator);
     }
 
     @Bean

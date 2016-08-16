@@ -1,14 +1,6 @@
 package ucles.weblab.common.actions.webapi;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
-import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
-import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -31,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethodSelector;
 import ucles.weblab.common.security.SecurityChecker;
-import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
-import ucles.weblab.common.schema.webapi.MoreFormats;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
-import ucles.weblab.common.schema.webapi.TypedReferenceSchema;
 import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.webapi.ActionParameter;
@@ -47,29 +36,15 @@ import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 import java.util.stream.Stream;
 import ucles.weblab.common.webapi.TitledLink;
-import ucles.weblab.common.xc.domain.CrossContextLink;
-import ucles.weblab.common.xc.service.CrossContextResolverService;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -80,30 +55,33 @@ public class ActionDecorator implements BeanFactoryAware {
     private final WorkflowTaskRepository workflowTaskRepository;
     private final CrossContextConversionService crossContextConversionService;
     private final ResourceSchemaCreator resourceSchemaCreator;
-    private final EnumSchemaCreator enumSchemaCreator;
-    private final JsonSchemaFactory schemaFactory;
-    
+    private final FormFieldSchemaCreator formFieldSchemaCreator;
+
     private BeanFactory beanFactory;
-    private Optional<PayPalFormKeyHandler> payPalFormKeyHandler;    
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private Collection<FormKeyHandler> formKeyHandlers;
 
     public ActionDecorator(SecurityChecker securityChecker,
                            DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
                            WorkflowTaskRepository workflowTaskRepository,
                            CrossContextConversionService crossContextConversionService,
                            ResourceSchemaCreator resourceSchemaCreator,
-                           EnumSchemaCreator enumSchemaCreator,
-                           final JsonSchemaFactory schemaFactory,
-                           Optional<PayPalFormKeyHandler> payPalFormKeyHandler) {
+                           FormFieldSchemaCreator formFieldSchemaCreator,
+                           Optional<List<FormKeyHandler>> formKeyHandlers) {
 
         this.securityChecker = securityChecker;
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
         this.workflowTaskRepository = workflowTaskRepository;
         this.crossContextConversionService = crossContextConversionService;
         this.resourceSchemaCreator = resourceSchemaCreator;
-        this.enumSchemaCreator = enumSchemaCreator;
-        this.schemaFactory = schemaFactory;
-        this.payPalFormKeyHandler = payPalFormKeyHandler;
+        this.formFieldSchemaCreator = formFieldSchemaCreator;
+        if (log.isInfoEnabled()) {
+            formKeyHandlers.ifPresent(hs -> {
+                for (FormKeyHandler formKeyHandler : hs) {
+                    log.info("Registering workflow form key handler: " + formKeyHandler.getName());
+                }
+            });
+        }
+        this.formKeyHandlers = formKeyHandlers.orElse(Collections.emptyList());
     }
 
     @Override
@@ -281,7 +259,7 @@ public class ActionDecorator implements BeanFactoryAware {
                                 .toUriComponentsBuilder().replaceQuery(null).build(true).toUri(), // strip parameters
                         actionCommand.title().isEmpty()? actionCommand.message() : actionCommand.title(),
                         actionCommand.description(),
-                        generateSchema(fields, parameters)
+                        formFieldSchemaCreator.createSchema(fields, parameters)
                 );
                 action.setEnctype(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
                 action.setMethod(HttpMethod.POST.toString());
@@ -300,137 +278,14 @@ public class ActionDecorator implements BeanFactoryAware {
 
     protected ActionableResourceSupport.Action processWorkflowTaskAction(WorkflowTaskEntity task, String businessKey, Map<String,String> parameters) {
         final String formKey = task.getFormKey();
-        final Pattern schemaFormKey = Pattern.compile("^schema:([a-z]+):(.*)$");
-        JsonSchema schema = null;
-        if (formKey != null) {
-            Matcher matcher = schemaFormKey.matcher(formKey);
-            if (matcher.matches()) {
-                String subType = matcher.group(1);
-                switch (subType) {
-                    case "variable": // Schema is a variable on the process
-                        Map<String, Object> variables = task.getContext().getVariables();
-                        if (variables != null && variables.containsKey(matcher.group(2))) {
-                            final String schemaString = (String) variables.get(matcher.group(2));
-                            try {
-                                schema = new ObjectMapper().readValue(schemaString, JsonSchema.class);
-                            } catch (IOException e) {
-                                log.error("Workflow returned a schema which could not be parsed:\n" + schemaString, e);
-                            }
-                        } else {
-                            log.warn("Workflow defined schema form key '" + formKey + "' which did not match a variable in the context: " + variables);
-                        }
-                        break;
-                    case "resource": // Schema is taken directly from a resource
-                        Class<?> resourceClass = null;
-                        try {
-                            resourceClass = Class.forName(matcher.group(2));
-                            Assert.isAssignable(ResourceSupport.class, resourceClass);
-                            schema = resourceSchemaCreator.create((Class<ResourceSupport>) resourceClass, URI.create("urn:none"),
-                                    Optional.empty(), Optional.empty());
-                        } catch (ClassNotFoundException | IllegalArgumentException e) {
-                            log.warn("Workflow defined schema form key '" + formKey + "' which did not match a resource on the classpath");
-                        }
-                        break;
-                    case "paypal":                        
-                        payPalFormKeyHandler.orElseThrow(() -> new IllegalArgumentException(formKey + " form key is found but no handler implementing: " +  PayPalFormKeyHandler.class));
 
-                        ActionableResourceSupport.Action action = payPalFormKeyHandler.get().createAction(task, parameters);
-                        if (action != null) {
-                            try {
-                                if (log.isDebugEnabled()){
-                                    log.debug("schema = " + objectMapper.writeValueAsString(action));
-                                }
-                            } catch (JsonProcessingException e) {
-                                log.warn("Ignoring exception while writing schema to debug log", e.getMessage());
-                            }
-                            return action;
-                        } else {
-                            break;
-                        }
-                    default:
-                        log.warn("Workflow defined schema form key with unknown sub-type: " + formKey);
-                }
-            } else {
-                log.warn("Workflow defined unknown form key: " + formKey);
-            }
-        }
-        if (schema == null) {
-            log.debug("No schema was derived from the form key, falling back to workflow-defined form");
-            Stream<WorkflowTaskFormField> stream = (Stream<WorkflowTaskFormField>) task.getFormFields().stream();
-            schema = generateSchema(stream, parameters);
-        }
-        ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(linkTo(methodOn(ActionAwareWorkflowController.class).completeTask(businessKey, task.getId(), parameters, null))
-                .toUriComponentsBuilder().replaceQuery(null).build(true).toUri(),
-                task.getName(), task.getDescription(), schema
-        );
-        action.setEnctype(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-        action.setMethod(HttpMethod.POST.toString());
-        action.setTargetSchema(new NullSchema());
-        action.setRel(task.getId());
-        return action;
-    }
+        FormKeyHandler formKeyHandler = formKeyHandlers.stream()
+                .filter(handler -> handler.canCreateActions(formKey))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(formKey + " form key is found but no suitable FormKeyHandler available in "
+                        + formKeyHandlers.stream().map(FormKeyHandler::getName).collect(toList())));
 
-    private JsonSchema generateSchema(Stream<WorkflowTaskFormField> fieldMap, Map<String,String> parameters) {
-        final ObjectSchema objectSchema = schemaFactory.objectSchema();
-        final AtomicInteger index = new AtomicInteger();
-        fieldMap.forEach(formField -> {
-            final JsonSchema fieldSchema;
-            switch (formField.getType()) {
-                case STRING: {
-                    fieldSchema = schemaFactory.stringSchema();
-                } break;
-                case BOOLEAN: {
-                    fieldSchema = schemaFactory.booleanSchema();
-                } break;
-                case DATE: {
-                    fieldSchema = schemaFactory.stringSchema();
-                    fieldSchema.asStringSchema().setFormat(JsonValueFormat.DATE);
-                } break;
-                case ENUM: {
-                    Map<String, String> enumValues = formField.getEnumValues();
-                    if (enumValues.isEmpty() && formField.getDefaultValue().toString().startsWith("urn:xc:")) {
-                        // External enumRef
-                        fieldSchema = schemaFactory.stringSchema();
-                        String enumRef = formField.getDefaultValue().toString();
-                        fieldSchema.setExtends(new com.fasterxml.jackson.module.jsonSchema.JsonSchema[]{
-                                new TypedReferenceSchema(crossContextConversionService.asUrl(URI.create(enumRef)).toString(), fieldSchema.getType())
-                        });
-                    } else {
-                        fieldSchema = enumSchemaCreator.createEnum(enumValues, schemaFactory::stringSchema);
-                    }
-                    fieldSchema.asValueTypeSchema().setFormat(JsonValueFormat.valueOf(MoreFormats.LIST));
-                } break;
-                case LONG: {
-                    fieldSchema = schemaFactory.numberSchema();
-                } break;
-                default:
-                    fieldSchema = schemaFactory.anySchema();
-            }
-            fieldSchema.asSimpleTypeSchema().setDefault(String.valueOf(formField.getDefaultValue()));
-            fieldSchema.asSimpleTypeSchema().setTitle(formField.getName());
-            fieldSchema.setDescription(formField.getDescription());
-            fieldSchema.setId(String.format("order:%03d_%s", index.incrementAndGet(), formField.getName()));
-            objectSchema.putProperty(formField.getName(), fieldSchema);
-        });
-        
-        //put all the workflow parameters on the schema  
-        //ObjectSchema allParametersSchema = schemaFactory.objectSchema();
-        parameters.keySet().stream().forEach((key) -> {
-            StringSchema stringSchema = schemaFactory.stringSchema();
-
-            String paramValue = parameters.get(key);
-
-
-            stringSchema.asSimpleTypeSchema().setDefault(paramValue);
-            stringSchema.asSimpleTypeSchema().setTitle(key);
-            stringSchema.setDescription("Workflow variable");
-            stringSchema.setReadonly(Boolean.TRUE);
-            stringSchema.setId(key);
-            objectSchema.putProperty(key, stringSchema);
-        });
-       
-        objectSchema.set$schema(ResourceSchemaCreator.HTTP_JSON_SCHEMA_ORG_DRAFT_03_SCHEMA);
-        return objectSchema;
+        return formKeyHandler.createAction(task, businessKey, parameters);
     }
 
     private boolean checkCondition(ActionCommand actionCommand, ActionableResourceSupport resource) {
