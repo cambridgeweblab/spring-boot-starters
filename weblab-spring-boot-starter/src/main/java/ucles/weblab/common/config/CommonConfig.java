@@ -24,7 +24,7 @@ import ucles.weblab.common.domain.jpa.MoreJsr310JpaConverters;
 import ucles.weblab.common.webapi.ControllerExceptionHandler;
 import ucles.weblab.common.webapi.converter.MoreGenericConverters;
 import ucles.weblab.common.webapi.converter.MoreJsr310Converters;
-import ucles.weblab.common.webapi.multipart.jersey.JerseyMultipartResolver;
+import ucles.weblab.common.multipart.webapi.jersey.JerseyMultipartResolver;
 
 import javax.persistence.EntityManager;
 import javax.servlet.FilterChain;
