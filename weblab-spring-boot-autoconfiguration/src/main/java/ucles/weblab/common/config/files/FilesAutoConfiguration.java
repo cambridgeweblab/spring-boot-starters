@@ -9,14 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import ucles.weblab.common.files.domain.AesGcmEncryptionStrategy;
-import ucles.weblab.common.files.domain.AutoPurgeSecureFileCollectionServiceImpl;
-import ucles.weblab.common.files.domain.DummyEncryptionStrategy;
-import ucles.weblab.common.files.domain.EncryptionService;
-import ucles.weblab.common.files.domain.EncryptionServiceImpl;
-import ucles.weblab.common.files.domain.FilesBuilders;
-import ucles.weblab.common.files.domain.SecureFileCollectionRepository;
-import ucles.weblab.common.files.domain.SecureFileCollectionService;
+import ucles.weblab.common.files.domain.*;
 import ucles.weblab.common.files.webapi.FileController;
 import ucles.weblab.common.files.webapi.converter.FilesConverters;
 
@@ -48,7 +41,7 @@ public class FilesAutoConfiguration {
     }
 
     @Bean
-    public SecureFileCollectionService secureFileCollectionService(SecureFileCollectionRepository secureFileCollectionRepository) {
-        return new AutoPurgeSecureFileCollectionServiceImpl(secureFileCollectionRepository);
+    public SecureFileCollectionService secureFileCollectionService(SecureFileCollectionRepository secureFileCollectionRepository, SecureFileRepository secureFileRepository) {
+        return new AutoPurgeSecureFileCollectionServiceImpl(secureFileCollectionRepository, secureFileRepository);
     }
 }
