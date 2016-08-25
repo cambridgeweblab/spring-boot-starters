@@ -56,9 +56,19 @@ public class FeedbackAutoConfiguration {
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
-    @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class, FeedbackController.class})
-    @ComponentScan(basePackageClasses = { FeedbackController.class })
+    @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
     public static class FeedbackAutoConfigurationWeb {
+        
+        @Bean
+        public FeedbackController feedbackController(FeedbackDelegate feedbackDelegate) {
+            return new FeedbackController(feedbackDelegate);
+        }
+        
+        @Bean
+        public FeedbackResourceAssembler feedbackResourceAssembler() {
+            return new FeedbackResourceAssembler();
+        }
+        
         @Bean
         public Function<FeedbackResource, Feedback> feedbackResourceToValue() {
             return FeedbackAdaptor::new;
