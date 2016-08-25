@@ -1,17 +1,33 @@
 package ucles.weblab.common.config.files;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
-import ucles.weblab.common.files.domain.s3.SecureFileCollectionRepositoryS3;
+import org.springframework.context.annotation.Configuration;
+import ucles.weblab.common.files.blob.api.BlobStoreService;
+import ucles.weblab.common.files.domain.s3.BlobStoreServiceS3;
+import ucles.weblab.common.files.domain.s3.S3HealthCheckIndicator;
 
 /**
- *
+ * An auto configuration class for when there is a BlobStoreServiceS3 initialised. 
+ * 
  * @author Sukhraj
  */
-@ConditionalOnClass(BasicAWSCredentials.class)
+@Configuration
+@ConditionalOnBean({BlobStoreServiceS3.class})
 public class FilesS3AutoConfiguration {
     
+    /**
+     * Declare health check for AWS S3
+     * @param basicAWSCredentials
+     * @param blobStoreService
+     * @return 
+     */
+    @Bean
+    public S3HealthCheckIndicator healthCheckIndicator(BasicAWSCredentials basicAWSCredentials,
+                                                       BlobStoreService blobStoreService) {
+        
+        return new S3HealthCheckIndicator(basicAWSCredentials, blobStoreService.getBucketName());
+    }
     
 }

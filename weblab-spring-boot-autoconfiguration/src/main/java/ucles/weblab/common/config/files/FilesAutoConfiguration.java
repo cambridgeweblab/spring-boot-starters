@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @Configuration
 @ConditionalOnClass({EncryptionService.class, SecureFileCollectionRepository.class})
-@AutoConfigureAfter({FilesJpaAutoConfiguration.class, FilesMongoAutoConfiguration.class})
+//@AutoConfigureAfter({FilesJpaAutoConfiguration.class, FilesS3AutoConfiguration.class})
 @Import({FilesConverters.class, FilesBuilders.class})
 @ComponentScan(basePackageClasses = FileController.class)
 public class FilesAutoConfiguration {
