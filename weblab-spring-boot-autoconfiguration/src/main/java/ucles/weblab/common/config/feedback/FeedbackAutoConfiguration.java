@@ -56,7 +56,7 @@ public class FeedbackAutoConfiguration {
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
-    @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
+    @ConditionalOnClass({FeedbackController.class, RestController.class, ResourceAssembler.class, ObjectMapper.class})
     public static class FeedbackAutoConfigurationWeb {
         
         @Bean
@@ -78,12 +78,14 @@ public class FeedbackAutoConfiguration {
         FeedbackDelegate feedbackDelegate(FeedbackFactory feedbackFactory,
                                           FeedbackRepository feedbackRepository,
                                           AccessAuditRepository accessAuditRepository,
-                                          FeedbackResourceAssembler feedbackResourceAssembler) {
+                                          FeedbackResourceAssembler feedbackResourceAssembler,
+                                          Function<FeedbackResource, Feedback> feedbackResourceToValue) {
+            
             return new FeedbackDelegate(feedbackFactory,
                                         feedbackRepository,
                                         accessAuditRepository,
                                         feedbackResourceAssembler,
-                                        feedbackResourceToValue());
+                                        feedbackResourceToValue);
         }
         
         
