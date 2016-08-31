@@ -66,9 +66,11 @@ public class ActionAwareWorkflowController {
         tasks.stream()
              .map(t -> actionDecorator.processWorkflowTaskAction(t, businessKey, parameters))
              .forEach((action) -> {
-                    //convert this to a spring link to set on the resource
-                    TitledLink tl = ActionableResourceSupport.convert(action);
-                    resource.add(tl);
+                    if (action != null) {
+                        //convert this to a spring link to set on the resource
+                        TitledLink tl = ActionableResourceSupport.convert(action);
+                        resource.add(tl);
+                    }
               });
 
         try {
