@@ -35,6 +35,13 @@ public class CommonControllerExceptionHandler extends ControllerExceptionHandler
     @Value("${suppress.errors:true}")
     private boolean suppressErrors;
 
+    @ExceptionHandler(value = { BadDataException.class})
+    protected ResponseEntity<Object> handleBadDataException(BadDataException e, WebRequest request) {
+        
+        return handleExceptionInternal(e, suppressErrors? null : new ErrorResource(e.getMessage(), e.getMessage()),
+                                      new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+    
     @ExceptionHandler(value = { DataIntegrityViolationException.class, TransactionSystemException.class })
     protected ResponseEntity<Object> handleDBException(DataIntegrityViolationException e, WebRequest request) {
         
