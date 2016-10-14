@@ -1,5 +1,6 @@
 package ucles.weblab.common.webapi.exception;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -46,6 +47,13 @@ public class CommonControllerExceptionHandler extends ControllerExceptionHandler
     protected ResponseEntity<Object> handleDBException(DataIntegrityViolationException e, WebRequest request) {
         
         return handleExceptionInternal(e, suppressErrors? null : new ErrorResource(e.getMessage(), String.valueOf(e.getMostSpecificCause().getMessage())),
+                                      new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+    
+    @ExceptionHandler(value = {ConstraintViolationException.class})
+    protected ResponseEntity<Object> handleDBException(ConstraintViolationException e, WebRequest request) {
+        
+        return handleExceptionInternal(e, suppressErrors? null : new ErrorResource(e.getMessage(), String.valueOf(e.getCause().getMessage())),
                                       new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
     

@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import ucles.weblab.common.webapi.UnhandledExceptionHandler;
+import ucles.weblab.common.webapi.exception.CommonControllerExceptionHandler;
 
 /**
  * Auto-configuration for the common classes.
@@ -46,7 +48,7 @@ import java.util.List;
  */
 @Configuration
 @AutoConfigureBefore(DispatcherServletAutoConfiguration.class)
-@ComponentScan(basePackageClasses = ControllerExceptionHandler.class)
+@ComponentScan(basePackageClasses = {CommonControllerExceptionHandler.class, UnhandledExceptionHandler.class})
 @Import({ConfigurableEntitySupport.class, MoreGenericConverters.class, MoreJsr310Converters.class})
 @EnableConfigurationProperties(MultipartProperties.class)
 public class CommonConfig {

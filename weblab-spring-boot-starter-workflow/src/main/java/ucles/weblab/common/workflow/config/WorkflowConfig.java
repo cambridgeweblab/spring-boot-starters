@@ -33,6 +33,7 @@ import ucles.weblab.common.workflow.webapi.converter.WorkflowConverters;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
 import java.util.UUID;
+import ucles.weblab.common.workflow.exception.ActivitiExceptionHandler;
 
 /**
  * Auto-configuration for the workflow domain.
@@ -41,7 +42,7 @@ import java.util.UUID;
  */
 @Configuration
 @AutoConfigureAfter({JacksonAutoConfiguration.class, JpaProcessEngineAutoConfiguration.class, DataSourceProcessEngineAutoConfiguration.class})
-@ComponentScan(basePackageClasses = {WorkflowController.class})
+@ComponentScan(basePackageClasses = {WorkflowController.class, ActivitiExceptionHandler.class})
 @Import({WorkflowConverters.class, WorkflowBuilders.class})
 public class WorkflowConfig {
 

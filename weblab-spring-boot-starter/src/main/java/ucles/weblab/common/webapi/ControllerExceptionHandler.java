@@ -1,15 +1,12 @@
 package ucles.weblab.common.webapi;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -22,6 +19,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.springframework.beans.factory.annotation.Value;
 import ucles.weblab.common.webapi.exception.ConflictException;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 /**
  * Formats system exception as error responses which can be interpreted by secure-ajax.js.
@@ -59,22 +58,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler
-    protected ResponseEntity<Object> handleUnhandledException(Exception e, WebRequest request) throws Exception {
-        // If the exception is an AccessDeniedException, rethrow it and let the framework handle it.
-        if (e instanceof AccessDeniedException) {
-            throw e;
-        }
-        // If the exception is annotated with @ResponseStatus rethrow it and let
-        // the framework handle it
-        if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
-            throw e;
-        }
-
-        logger.warn("An unhandled internal exception was returned", e);
-        return handleExceptionInternal(e, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
-
     /**
      * Overrides the default implementation to use status code 422 Unprocessable Entity for validation errors.
      *
@@ -108,6 +91,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      * @param headers {@inheritDoc}
      * @param status  {@inheritDoc}
      * @param request {@inheritDoc}
+     * @return 
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -126,7 +110,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
             }
         }
 
-        headers.setContentType(MoreMediaTypes.APPLICATION_JSON_UTF8);
+        headers.setContentType(APPLICATION_JSON_UTF8);
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 }
