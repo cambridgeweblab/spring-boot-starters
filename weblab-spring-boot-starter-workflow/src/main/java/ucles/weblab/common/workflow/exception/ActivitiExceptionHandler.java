@@ -42,7 +42,7 @@ public class ActivitiExceptionHandler extends ResponseEntityExceptionHandler  {
         
         if (rootCause instanceof SQLException) {
             return handleExceptionInternal(e, 
-                                    suppressErrors? null : new ErrorResource(e.getMessage(), String.valueOf(e.getCause().getMessage())),
+                                    suppressErrors? null : new ErrorResource("Item already exists", "The item you are attempting to create already exists. To make changes, please edit the original."),
                                     new HttpHeaders(), 
                                     HttpStatus.CONFLICT, 
                                     request);
