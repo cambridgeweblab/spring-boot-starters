@@ -1,5 +1,6 @@
 package ucles.weblab.common.config;
 
+import com.mongodb.Mongo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -21,6 +22,7 @@ import ucles.weblab.common.domain.BuilderProxyFactory;
 import ucles.weblab.common.domain.ConfigurableEntitySupport;
 import ucles.weblab.common.domain.jpa.MoreCoreJavaJpaConverters;
 import ucles.weblab.common.domain.jpa.MoreJsr310JpaConverters;
+import ucles.weblab.common.domain.mongodb.MoreCoreJavaMongoConverters;
 import ucles.weblab.common.webapi.ControllerExceptionHandler;
 import ucles.weblab.common.webapi.converter.MoreGenericConverters;
 import ucles.weblab.common.webapi.converter.MoreJsr310Converters;
@@ -136,5 +138,10 @@ public class CommonConfig {
     @ConditionalOnClass(EntityManager.class)
     @EntityScan(basePackageClasses = {MoreJsr310JpaConverters.class, MoreCoreJavaJpaConverters.class})
     public static class CommonJpaConvertersConfig {}
+
+    @Configuration
+    @ConditionalOnClass(Mongo.class)
+    @Import({MoreCoreJavaMongoConverters.class})
+    public static class CommonMongoConvertersConfig {}
 
 }
