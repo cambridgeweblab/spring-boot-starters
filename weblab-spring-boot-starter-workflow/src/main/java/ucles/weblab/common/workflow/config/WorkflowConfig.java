@@ -5,6 +5,9 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.delegate.ExecutionListener;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.spring.boot.DataSourceProcessEngineAutoConfiguration;
 import org.activiti.spring.boot.JpaProcessEngineAutoConfiguration;
 import org.springframework.boot.CommandLineRunner;
@@ -75,6 +78,21 @@ public class WorkflowConfig {
     @Bean
     public HistoricWorkflowStepRepository historicWorkflowStepRepository(HistoryService historyService) {
         return new HistoricWorkflowStepRepositoryActiviti(historyService);
+    }
+
+    /**
+     * To cascade business key from parent to a child 'Call Activity' subprocess, configure the subprocess to
+     * use this as an execution listener.
+     * <pre>
+     *    &lt;extensionElements&gt;
+     *     &lt;activiti:executionListener event="start" delegateExpression="${cascadeBusinessKeyExecutionListener}"&gt;&lt;/activiti:executionListener&gt;
+     *   &lt;/extensionElements&gt;
+     * </pre>
+     */
+    @Bean
+    public ExecutionListener cascadeBusinessKeyExecutionListener() {
+        return execution -> ((ExecutionEntity)execution).getProcessInstance().setBusinessKey(
+                    ((ExecutionEntity)execution).getSuperExecution().getProcessBusinessKey());
     }
 
     /**
