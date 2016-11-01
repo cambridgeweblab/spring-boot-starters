@@ -67,8 +67,10 @@ public class FormFieldSchemaCreator {
                 default:
                     fieldSchema = schemaFactory.anySchema();
             }
-            fieldSchema.asSimpleTypeSchema().setDefault(String.valueOf(formField.getDefaultValue()));
-            fieldSchema.asSimpleTypeSchema().setTitle(formField.getName());
+            if (formField.getDefaultValue() != null) {
+                fieldSchema.asSimpleTypeSchema().setDefault(String.valueOf(formField.getDefaultValue()));
+            }
+            fieldSchema.asSimpleTypeSchema().setTitle(formField.getLabel());
             fieldSchema.setDescription(formField.getDescription());
             fieldSchema.setId(String.format("order:%03d_%s", index.incrementAndGet(), formField.getName()));
             objectSchema.putProperty(formField.getName(), fieldSchema);
