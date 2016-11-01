@@ -20,6 +20,7 @@ import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.test.webapi.WebTestSupport;
+import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
@@ -29,7 +30,10 @@ import ucles.weblab.common.xc.service.CrossContextConversionServiceImpl;
 
 import javax.validation.constraints.Pattern;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -91,6 +95,9 @@ public class ActionDecorator_IT {
     @Autowired
     ActionDecorator actionDecorator;
 
+    @Autowired
+    WorkflowTaskRepository workflowTaskRepository;
+
     @Before
     public void setUp() throws Exception {
         WebTestSupport.setUpRequestContext();
@@ -116,12 +123,50 @@ public class ActionDecorator_IT {
         assertEquals("Expect empty schema actions", 0, action.getSchema().asObjectSchema().getProperties().size());
     }
 
+    @Test
+    public void testExistingWorkflowTasks() {
+        WorkflowTaskEntity task = mock(WorkflowTaskEntity.class);
+        when(task.getFormKey()).thenReturn("unrecognised");
+        when(task.getId()).thenReturn(UUID.randomUUID().toString());
+
+        when(workflowTaskRepository.findAllByProcessInstanceBusinessKey("ooh:aah")).thenReturn((List) Collections.singletonList(task));
+        final DummyActionableResource resource = new DummyActionableResource();
+        actionDecorator.processResource(resource);
+        assertEquals("Expect an action link", 1, resource.getLinks().size());
+    }
+
+    @Test
+    public void testExistingWorkflowTasksWithMissingBusinessKey() {
+        WorkflowTaskEntity task = mock(WorkflowTaskEntity.class);
+        when(task.getFormKey()).thenReturn("unrecognised");
+        when(task.getId()).thenReturn(UUID.randomUUID().toString());
+
+        when(workflowTaskRepository.findAllByProcessInstanceBusinessKey("ooh:aah")).thenReturn((List) Collections.singletonList(task));
+        final DummyActionableResource resource = new DummyActionableResource();
+        resource.setGinaKey(null);
+        actionDecorator.processResource(resource);
+        assertEquals("Expect no action links for null key", 0, resource.getLinks().size());
+    }
+
     static class DummyResource extends ResourceSupport {
         @Pattern(regexp = "================")
         String galacticSuperhighway;
 
         public String getGalacticSuperhighway() {
             return galacticSuperhighway;
+        }
+    }
+
+    @ActionCommands(businessKey = "#{ginaKey}")
+    static class DummyActionableResource extends ActionableResourceSupport {
+        private URI ginaKey = URI.create("ooh:aah");
+
+        public URI getGinaKey() {
+            return ginaKey;
+        }
+
+        public void setGinaKey(URI ginaKey) {
+            this.ginaKey = ginaKey;
         }
     }
 

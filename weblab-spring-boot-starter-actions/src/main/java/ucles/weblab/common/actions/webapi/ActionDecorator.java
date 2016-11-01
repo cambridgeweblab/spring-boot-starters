@@ -17,7 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +44,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import ucles.weblab.common.webapi.TitledLink;
 
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -93,20 +94,24 @@ public class ActionDecorator implements BeanFactoryAware {
         if (resource == null) {
             return;
         }
-        
-        final ActionCommand[] actionCommands = findAnnotations(resource);
-        if (actionCommands.length == 0) {
-            return;
-        }
 
         // TODO: cache workflows which can be started for any given action command, since these will be the same across all resource instances.
         List<ActionableResourceSupport.Action> actions = new ArrayList<>();
-                
-        for (ActionCommand actionCommand : actionCommands) {
+
+        final ActionCommands actionCommands = AnnotationUtils.findAnnotation(resource.getClass(), ActionCommands.class);
+        if (actionCommands != null && !actionCommands.businessKey().isEmpty()) {
+            final Object businessKey = evaluateExpression(resource, actionCommands.businessKey());
+            if (!StringUtils.isEmpty(businessKey)) {
+                processExistingWorkflowTaskActions(resource, Optional.empty(), URI.create(businessKey.toString())).forEach(actions::add);
+            }
+        }
+
+        final ActionCommand[] actionCommandList = findAnnotations(resource);
+        for (ActionCommand actionCommand : actionCommandList) {
             if (actionCommand.authorization().isEmpty() || securityChecker.check(actionCommand.authorization())) {
                 if (actionCommand.condition().isEmpty() || checkCondition(actionCommand, resource)) {
                     log.info("Processing action command '" + actionCommand.name() + "' on resource " + resource.toString());
-                     
+
                     if (!actionCommand.message().isEmpty()) {
                         final URI businessKey;
                         if (actionCommand.createNewKey()) {
@@ -116,22 +121,14 @@ public class ActionDecorator implements BeanFactoryAware {
                         }
 
                         processWorkflowAction(resource, actionCommand, businessKey).ifPresent(actions::add);
-
-                        final List<? extends WorkflowTaskEntity> tasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey.toString());
-                        // Also check for any existing workflow tasks for this resource
-                        // TODO: Demoware - this does not restrict by audience, so everyone sees all tasks
-                        Map<String, String> parameters = evaluateWorkflowVariables(resource, actionCommand.workFlowVariables());
-                        
-                        tasks.stream()
-                             .map(t -> processWorkflowTaskAction(t, businessKey.toString(), parameters))
-                             .forEach(actions::add);
+                        processExistingWorkflowTaskActions(resource, Optional.of(actionCommand), businessKey).forEach(actions::add);
 
                     } else if (Void.class != actionCommand.controller()) {
                         // TODO: Also check authorization on the controller method itself.
                         processControllerAction(resource, actionCommand).ifPresent(actions::add);
                     } else {
                         log.error("Action command '" + actionCommand.name() + "' has no workflow message or controller method specified.");
-                    }                    
+                    }
                 } else {
                     if (log.isDebugEnabled()) log.debug("Action command '" + actionCommand.name() + "' has unsatisfied condition on resource " + resource.toString());
                 }
@@ -139,9 +136,8 @@ public class ActionDecorator implements BeanFactoryAware {
                 if (log.isDebugEnabled()) log.debug("Action command '" + actionCommand.name() + "' forbidden on resource " + resource.toString());
             }
         }
-        
-               
-        if (!actions.isEmpty()) {            
+
+        if (!actions.isEmpty()) {
             actions.stream()
                 .forEach((action) -> {
                     //convert this to a spring link to set on the resource
@@ -151,26 +147,34 @@ public class ActionDecorator implements BeanFactoryAware {
         }
     }
 
+    protected Stream<ActionableResourceSupport.Action> processExistingWorkflowTaskActions(ActionableResourceSupport resource, Optional<ActionCommand> actionCommand, URI businessKey) {
+        final List<? extends WorkflowTaskEntity> tasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey.toString());
+        // Also check for any existing workflow tasks for this resource
+        // TODO: Demoware - this does not restrict by audience, so everyone sees all tasks
+        Map<String, String> parameters = actionCommand.map(cmd -> evaluateWorkflowVariables(resource, cmd.workFlowVariables()))
+                .orElse(emptyMap());
+
+        return tasks.stream()
+                .map(t -> processWorkflowTaskAction(t, businessKey.toString(), parameters));
+    }
+
     private Map<String,String> evaluateWorkflowVariables(ActionableResourceSupport resource, ActionParameterNameValue[] workFlowVariables) {
-        //evaluate the values using spring                                                 
+        //evaluate the values using spring
         Map<String, String> parameters = new HashMap<>();
         for (ActionParameterNameValue v : workFlowVariables) {
-            Expression expression = new SpelExpressionParser().parseExpression(v.value(), new TemplateParserContext());
-            StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
-            evalContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
-            Object value = expression.getValue(evalContext);                            
+            Object value = evaluateExpression(resource, v.value());
             parameters.put(v.name(), value.toString());
         }
-        
+
         return parameters;
     }
-    
+
     private Optional<ActionableResourceSupport.Action> processControllerAction(ActionableResourceSupport resource, ActionCommand actionCommand) {
         // Find the controller method and its parameters
-        final Method method = findControllerMethod(actionCommand);        
+        final Method method = findControllerMethod(actionCommand);
         if (method == null) {
             return Optional.empty();
-        }        
+        }
         final Parameter[] parameters = method.getParameters();
         final Object[] arguments = evaluateControllerMethodArguments(resource, actionCommand, method, parameters);
         Class<ResourceSupport> resourceType = null;
@@ -242,7 +246,7 @@ public class ActionDecorator implements BeanFactoryAware {
     }
 
     private Optional<ActionableResourceSupport.Action> processWorkflowAction(ActionableResourceSupport resource, ActionCommand actionCommand, final URI businessKey) {
-        
+
         final List<? extends DeployedWorkflowProcessEntity> targetProcesses = deployedWorkflowProcessRepository.findAllByStartMessage(actionCommand.message());
 
         if (!targetProcesses.isEmpty()) {
@@ -253,7 +257,7 @@ public class ActionDecorator implements BeanFactoryAware {
                 final Stream<WorkflowTaskFormField> fields = targetProcesses.stream()
                         .flatMap(p -> p.getStartFormFields().stream());
                 Map<String, String> parameters = evaluateWorkflowVariables(resource, actionCommand.workFlowVariables());
-                                 
+
                 final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
                         linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null))
                                 .toUriComponentsBuilder().replaceQuery(null).build(true).toUri(), // strip parameters
@@ -297,7 +301,12 @@ public class ActionDecorator implements BeanFactoryAware {
     }
 
     private Object evaluateParameter(ActionParameter parameter, ActionableResourceSupport resource) {
-        final Expression expression = new SpelExpressionParser().parseExpression(parameter.value(), new TemplateParserContext());
+        final String value = parameter.value();
+        return evaluateExpression(resource, value);
+    }
+
+    private Object evaluateExpression(ActionableResourceSupport resource, String expr) {
+        final Expression expression = new SpelExpressionParser().parseExpression(expr, new TemplateParserContext());
 
         StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
         evalContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
