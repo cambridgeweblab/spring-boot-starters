@@ -54,8 +54,13 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     
     @ExceptionHandler(value = ConflictException.class)
     protected ResponseEntity<Object> handleConflictException(ConflictException e, WebRequest request) {
-        return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
+        if (e.getConflictingItems() != null && !e.getConflictingItems().isEmpty()) {            
+            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), e.getDetail(), e.getConflictingItems()),
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
+        } else {
+            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
+        }
     }
 
     /**
