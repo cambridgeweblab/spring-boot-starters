@@ -1,30 +1,18 @@
 package ucles.weblab.common.workflow.webapi;
 
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.webapi.AccessAudited;
 import ucles.weblab.common.webapi.exception.ReferencedEntityNotFoundException;
 import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
 import ucles.weblab.common.webapi.resource.ResourceListWrapper;
-import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
-import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
-import ucles.weblab.common.workflow.domain.EditableWorkflowProcessEntity;
-import ucles.weblab.common.workflow.domain.EditableWorkflowProcessRepository;
-import ucles.weblab.common.workflow.domain.HistoricWorkflowStepEntity;
-import ucles.weblab.common.workflow.domain.HistoricWorkflowStepRepository;
-import ucles.weblab.common.workflow.domain.WorkflowFactory;
-import ucles.weblab.common.workflow.domain.WorkflowProcess;
-import ucles.weblab.common.workflow.domain.WorkflowService;
-import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
-import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
+import ucles.weblab.common.workflow.domain.*;
 import ucles.weblab.common.workflow.webapi.converter.DeployedWorkflowProcessResourceAssembler;
 import ucles.weblab.common.workflow.webapi.converter.EditableWorkflowProcessResourceAssembler;
 import ucles.weblab.common.workflow.webapi.converter.WorkflowAuditResourceAssembler;
@@ -32,21 +20,18 @@ import ucles.weblab.common.workflow.webapi.resource.WorkflowAuditResource;
 import ucles.weblab.common.workflow.webapi.resource.WorkflowModelResource;
 import ucles.weblab.common.workflow.webapi.resource.WorkflowProcessDefResource;
 
+import javax.xml.transform.Source;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import javax.xml.transform.Source;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static ucles.weblab.common.schema.webapi.SchemaMediaTypes.APPLICATION_SCHEMA_JSON_UTF8_VALUE;
 import static ucles.weblab.common.webapi.HateoasUtils.locationHeader;
 import static ucles.weblab.common.webapi.LinkRelation.DESCRIBED_BY;
 import static ucles.weblab.common.webapi.MoreMediaTypes.APPLICATION_JSON_UTF8_VALUE;
@@ -68,9 +53,10 @@ public class WorkflowController {
     private final DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler;
     private final EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler;
     private final WorkflowAuditResourceAssembler workflowAuditResourceAssembler;
+    private final ResourceSchemaCreator schemaCreator;
 
     @Autowired
-    public WorkflowController(DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, EditableWorkflowProcessRepository editableWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, HistoricWorkflowStepRepository historicWorkflowStepRepository, WorkflowFactory workflowFactory, WorkflowService workflowService, DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler, EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler, WorkflowAuditResourceAssembler workflowAuditResourceAssembler) {
+    public WorkflowController(DeployedWorkflowProcessRepository deployedWorkflowProcessRepository, EditableWorkflowProcessRepository editableWorkflowProcessRepository, WorkflowTaskRepository workflowTaskRepository, HistoricWorkflowStepRepository historicWorkflowStepRepository, WorkflowFactory workflowFactory, WorkflowService workflowService, DeployedWorkflowProcessResourceAssembler deployedWorkflowProcessResourceAssembler, EditableWorkflowProcessResourceAssembler editableWorkflowProcessResourceAssembler, WorkflowAuditResourceAssembler workflowAuditResourceAssembler, ResourceSchemaCreator schemaCreator) {
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
         this.editableWorkflowProcessRepository = editableWorkflowProcessRepository;
         this.workflowTaskRepository = workflowTaskRepository;
@@ -80,6 +66,7 @@ public class WorkflowController {
         this.deployedWorkflowProcessResourceAssembler = deployedWorkflowProcessResourceAssembler;
         this.editableWorkflowProcessResourceAssembler = editableWorkflowProcessResourceAssembler;
         this.workflowAuditResourceAssembler = workflowAuditResourceAssembler;
+        this.schemaCreator = schemaCreator;
     }
 
     @RequestMapping(value = "/processes/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
@@ -105,7 +92,7 @@ public class WorkflowController {
     public ResponseEntity<Source> returnBpmn20ForProcessDefinition(@PathVariable String processId) {
         final DeployedWorkflowProcessEntity entity = deployedWorkflowProcessRepository.findOneById(processId)
                 .orElseThrow(() -> new ResourceNotFoundException(processId));
-        return ResponseEntity.ok(entity.getBpmn20Xml());        
+        return ResponseEntity.ok(entity.getBpmn20Xml());
     }
 
     @RequestMapping(value = "/processes/{processId}/", method = GET, produces = IMAGE_PNG_VALUE)
@@ -202,10 +189,38 @@ public class WorkflowController {
     }
 
     @RequestMapping(value = "/instanceKey/{businessKey}/history/steps/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
-    public List<WorkflowAuditResource> listWorkflowAudit(@PathVariable String businessKey) {
+    public ResourceListWrapper<WorkflowAuditResource> listWorkflowAudit(@PathVariable String businessKey) {
         final List<? extends HistoricWorkflowStepEntity> entities = historicWorkflowStepRepository.findAllByProcessInstanceBusinessKey(businessKey);
-        return entities.stream().map(workflowAuditResourceAssembler::toResource).collect(toList());
+        ResourceListWrapper<WorkflowAuditResource> listWrapper = ResourceListWrapper.wrap(entities.stream().map(workflowAuditResourceAssembler::toResource).collect(toList()));
+        listWrapper.add(linkTo(methodOn(WorkflowController.class)).withRel(DESCRIBED_BY.rel()));
+        return listWrapper;
     }
 
+    @RequestMapping(value = "/models$schema", method = RequestMethod.GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    public ResponseEntity<JsonSchema> describeWorkflowModels() {
+        final JsonSchema body = schemaCreator.create(WorkflowModelResource.class,
+                methodOn(WorkflowController.class).describeWorkflowModels(),
+                Optional.of(methodOn(WorkflowController.class).listModels()),
+                Optional.of(methodOn(WorkflowController.class).createNewModel(null)));
+        return ResponseEntity.ok(body);
+    }
+
+    @RequestMapping(value = "/processes$schema", method = RequestMethod.GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    public ResponseEntity<JsonSchema> describeWorkflowProcesses() {
+        final JsonSchema body = schemaCreator.create(WorkflowProcessDefResource.class,
+                methodOn(WorkflowController.class).describeWorkflowProcesses(),
+                Optional.of(methodOn(WorkflowController.class).listWorkflowProcessDefinitions()),
+                Optional.empty());
+        return ResponseEntity.ok(body);
+    }
+
+    @RequestMapping(value = "/instanceKey/{businessKey}/history/steps$schema", method = GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    public ResponseEntity<JsonSchema> describeWorkflowAudit(@PathVariable String businessKey) {
+        JsonSchema jsonSchema = schemaCreator.create(WorkflowAuditResource.class,
+                methodOn(WorkflowController.class).describeWorkflowAudit(businessKey),
+                Optional.of(methodOn(WorkflowController.class).listWorkflowAudit(businessKey)),
+                Optional.empty());
+        return ResponseEntity.ok(jsonSchema);
+    }
 
 }
