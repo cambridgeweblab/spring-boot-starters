@@ -28,12 +28,14 @@ import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.webapi.ActionParameter;
 import ucles.weblab.common.webapi.ActionParameterNameValue;
+import ucles.weblab.common.webapi.LinkRelation;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
+import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
 import java.lang.reflect.Method;
@@ -103,6 +105,9 @@ public class ActionDecorator implements BeanFactoryAware {
             final Object businessKey = evaluateExpression(resource, actionCommands.businessKey());
             if (!StringUtils.isEmpty(businessKey)) {
                 processExistingWorkflowTaskActions(resource, Optional.empty(), URI.create(businessKey.toString())).forEach(actions::add);
+                // Add a history link to the workflow audit trail.
+                resource.add(new TitledLink(linkTo(methodOn(WorkflowController.class).listWorkflowAudit(businessKey.toString())),
+                        LinkRelation.ARCHIVES.rel(), "History", HttpMethod.GET.name()));
             }
         }
 

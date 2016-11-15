@@ -21,6 +21,7 @@ import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.test.webapi.WebTestSupport;
 import ucles.weblab.common.webapi.ActionCommands;
+import ucles.weblab.common.webapi.LinkRelation;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
@@ -38,6 +39,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -132,7 +134,8 @@ public class ActionDecorator_IT {
         when(workflowTaskRepository.findAllByProcessInstanceBusinessKey("ooh:aah")).thenReturn((List) Collections.singletonList(task));
         final DummyActionableResource resource = new DummyActionableResource();
         actionDecorator.processResource(resource);
-        assertEquals("Expect an action link", 1, resource.getLinks().size());
+        assertTrue("Expect an action link", resource.getLinks().stream().anyMatch(l -> l.getRel().startsWith("action:")));
+        assertTrue("Expect a history link", resource.getLinks().stream().anyMatch(l -> l.getRel().equals(LinkRelation.ARCHIVES.rel())));
     }
 
     @Test
