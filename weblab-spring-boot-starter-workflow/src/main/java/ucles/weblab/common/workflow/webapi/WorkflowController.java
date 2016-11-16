@@ -192,7 +192,7 @@ public class WorkflowController {
     public ResourceListWrapper<WorkflowAuditResource> listWorkflowAudit(@PathVariable String businessKey) {
         final List<? extends HistoricWorkflowStepEntity> entities = historicWorkflowStepRepository.findAllByProcessInstanceBusinessKey(businessKey);
         ResourceListWrapper<WorkflowAuditResource> listWrapper = ResourceListWrapper.wrap(entities.stream().map(workflowAuditResourceAssembler::toResource).collect(toList()));
-        listWrapper.add(linkTo(methodOn(WorkflowController.class)).withRel(DESCRIBED_BY.rel()));
+        listWrapper.add(linkTo(methodOn(WorkflowController.class).describeWorkflowAudit(businessKey)).withRel(DESCRIBED_BY.rel()));
         return listWrapper;
     }
 
