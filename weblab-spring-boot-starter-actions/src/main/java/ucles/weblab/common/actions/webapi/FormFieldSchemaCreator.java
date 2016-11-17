@@ -73,7 +73,8 @@ public class FormFieldSchemaCreator {
             fieldSchema.asSimpleTypeSchema().setTitle(formField.getLabel());
             fieldSchema.setDescription(formField.getDescription());
             fieldSchema.setId(String.format("order:%03d_%s", index.incrementAndGet(), formField.getName()));
-            objectSchema.putProperty(formField.getName(), fieldSchema);
+            fieldSchema.setRequired(formField.isRequired());
+            objectSchema.putOptionalProperty(formField.getName(), fieldSchema);
         });
 
         //put all the workflow parameters on the schema
