@@ -2,7 +2,11 @@ package ucles.weblab.common.workflow.webapi.resource;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import org.springframework.hateoas.ResourceSupport;
+import ucles.weblab.common.schema.webapi.JsonSchema;
+import ucles.weblab.common.schema.webapi.JsonSchemaMetadata;
+import ucles.weblab.common.schema.webapi.MoreFormats;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -15,10 +19,16 @@ import java.util.Objects;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkflowAuditResource extends ResourceSupport implements Comparable<WorkflowAuditResource> {
+    @JsonSchemaMetadata(title = "Username", order = 30)
     private String actor;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @JsonSchema(format = JsonValueFormat.DATE_TIME_VALUE)
+    @JsonSchemaMetadata(title = "Time", order = 10)
     private Instant auditInstant;
+    @JsonSchemaMetadata(title = "Action", order = 20)
     private String action;
+    @JsonSchema(format = MoreFormats.DURATION)
+    @JsonSchemaMetadata(title = "Time taken", order = 40)
     private Duration duration;
 
     protected WorkflowAuditResource() { // For Jackson
