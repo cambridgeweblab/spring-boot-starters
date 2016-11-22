@@ -10,6 +10,7 @@ import ucles.weblab.common.schema.webapi.MoreFormats;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -30,15 +31,19 @@ public class WorkflowAuditResource extends ResourceSupport implements Comparable
     @JsonSchema(format = MoreFormats.DURATION)
     @JsonSchemaMetadata(title = "Time taken", order = 40)
     private Duration duration;
+    @JsonSchema(format = MoreFormats.TABLE)
+    @JsonSchemaMetadata(title = "Properties", order = 50)
+    private Map<String, String> properties;
 
     protected WorkflowAuditResource() { // For Jackson
     }
 
-    public WorkflowAuditResource(String actor, Instant auditInstant, String action, Duration duration) {
+    public WorkflowAuditResource(String actor, Instant auditInstant, String action, Duration duration, Map<String, String> properties) {
         this.actor = actor;
         this.auditInstant = auditInstant;
         this.action = action;
         this.duration = duration;
+        this.properties = properties;
     }
 
     public String getActor() {
@@ -55,6 +60,10 @@ public class WorkflowAuditResource extends ResourceSupport implements Comparable
 
     public Duration getDuration() {
         return duration;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 
     @Override

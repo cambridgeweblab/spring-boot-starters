@@ -30,4 +30,9 @@ public class WorkflowBuilders {
     public Supplier<WorkflowTaskContext.Builder> workflowTaskContextBuilder() {
         return () -> builderProxyFactory.builder(WorkflowTaskContext.Builder.class, WorkflowTaskContext.class);
     }
+
+    @Bean
+    public Supplier<HistoricWorkflowStepFormField.Builder> historicWorkflowStepFormFieldBuilder() {
+        return () -> builderProxyFactory.builder(HistoricWorkflowStepFormField.Builder.class, HistoricWorkflowStepFormField.class);
+    }
 }

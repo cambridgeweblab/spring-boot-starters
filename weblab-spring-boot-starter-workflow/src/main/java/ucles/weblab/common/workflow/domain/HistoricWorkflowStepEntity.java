@@ -5,5 +5,5 @@ package ucles.weblab.common.workflow.domain;
  *
  * @since 28/07/15
  */
-public interface HistoricWorkflowStepEntity extends HistoricWorkflowStep {
+public interface HistoricWorkflowStepEntity extends HistoricWorkflowStepAggregate {
 }
