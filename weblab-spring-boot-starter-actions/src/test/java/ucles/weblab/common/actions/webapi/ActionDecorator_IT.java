@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -79,8 +79,13 @@ public class ActionDecorator_IT {
         }
 
         @Bean
-        ResourceSchemaCreator resourceSchemaCreator(SecurityChecker securityChecker, CrossContextConversionService crossContextConversionService, EnumSchemaCreator enumSchemaCreator, JsonSchemaFactory jsonSchemaFactory) {
-            return new ResourceSchemaCreator(securityChecker, new ObjectMapper(), crossContextConversionService, enumSchemaCreator, jsonSchemaFactory);
+        ResourceSchemaCreator resourceSchemaCreator(SecurityChecker securityChecker,
+                                                    CrossContextConversionService crossContextConversionService,
+                                                    EnumSchemaCreator enumSchemaCreator,
+                                                    JsonSchemaFactory jsonSchemaFactory,
+                                                    MessageSource messageSource) {
+            return new ResourceSchemaCreator(securityChecker, new ObjectMapper(), crossContextConversionService,
+                    enumSchemaCreator, jsonSchemaFactory, messageSource);
         }
 
         @Bean

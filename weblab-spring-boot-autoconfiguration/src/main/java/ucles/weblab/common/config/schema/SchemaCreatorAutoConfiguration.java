@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
@@ -41,8 +42,14 @@ public class SchemaCreatorAutoConfiguration {
     }
 
     @Bean
-    ResourceSchemaCreator schemaCreator(SecurityChecker securityChecker, ObjectMapper objectMapper, CrossContextConversionService crossContextConversionService, EnumSchemaCreator enumSchemaCreator, JsonSchemaFactory schemaFactory) {
-        return new ResourceSchemaCreator(securityChecker, objectMapper, crossContextConversionService, enumSchemaCreator, schemaFactory);
+    ResourceSchemaCreator schemaCreator(SecurityChecker securityChecker,
+                                        ObjectMapper objectMapper,
+                                        CrossContextConversionService crossContextConversionService,
+                                        EnumSchemaCreator enumSchemaCreator,
+                                        JsonSchemaFactory schemaFactory,
+                                        MessageSource messageSource) {
+        return new ResourceSchemaCreator(securityChecker, objectMapper, crossContextConversionService,
+                enumSchemaCreator, schemaFactory, messageSource);
     }
 
     @Bean
@@ -51,10 +58,11 @@ public class SchemaCreatorAutoConfiguration {
     }
 
     @Bean
-    ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper, 
-                                                                CrossContextConversionService crossContextConversionService, 
-                                                                EnumSchemaCreator enumSchemaCreator) {
-        return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator);
+    ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper,
+                                                                CrossContextConversionService crossContextConversionService,
+                                                                EnumSchemaCreator enumSchemaCreator,
+                                                                MessageSource messageSource) {
+        return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator, messageSource);
     }
 
     @Bean
