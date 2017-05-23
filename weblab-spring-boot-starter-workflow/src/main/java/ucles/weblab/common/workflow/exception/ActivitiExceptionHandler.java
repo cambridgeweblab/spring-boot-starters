@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import org.activiti.engine.ActivitiException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,40 +16,41 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import ucles.weblab.common.webapi.resource.ErrorResource;
 
 /**
- * An exception handler to handle Activiti exception thrown from the workflow 
- * engine. 
- * 
+ * An exception handler to handle Activiti exception thrown from the workflow
+ * engine.
+ *
  * @author Sukhraj
  */
+@ConditionalOnWebApplication
 @ControllerAdvice
 @ResponseBody
 public class ActivitiExceptionHandler extends ResponseEntityExceptionHandler  {
- 
+
     @Value("${suppress.errors:true}")
     private boolean suppressErrors;
-    
+
     /**
      * A handler to get the root cause of an ActivitiException and throw a sensible
-     * error code based on the cause. 
-     * 
+     * error code based on the cause.
+     *
      * @param e - the ActivitiException
      * @param request - the request context
      * @return
-     * @throws Throwable - if the cause is something that is not handled, throw it. 
+     * @throws Throwable - if the cause is something that is not handled, throw it.
      */
     @ExceptionHandler(value = {ActivitiException.class})
     protected ResponseEntity<Object> handleActivitiException(ActivitiException e, WebRequest request) throws Throwable {
         Throwable rootCause = ExceptionUtils.getRootCause(e);
-        
+
         if (rootCause instanceof SQLException) {
-            return handleExceptionInternal(e, 
+            return handleExceptionInternal(e,
                                     suppressErrors? null : new ErrorResource("Item already exists", "The item you are attempting to create already exists. To make changes, please edit the original."),
-                                    new HttpHeaders(), 
-                                    HttpStatus.CONFLICT, 
+                                    new HttpHeaders(),
+                                    HttpStatus.CONFLICT,
                                     request);
         } else {
             throw rootCause;
-        }        
+        }
     }
- 
+
 }

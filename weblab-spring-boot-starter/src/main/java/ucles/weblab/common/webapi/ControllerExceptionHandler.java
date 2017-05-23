@@ -1,5 +1,6 @@
 package ucles.weblab.common.webapi;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
  *
  * @since 23/03/15
  */
+@ConditionalOnWebApplication
 @ControllerAdvice
 @ResponseBody
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
-    
-    @Value("${suppress.errors:true}") 
+
+    @Value("${suppress.errors:true}")
     private boolean suppressErrors;
-    
+
     @ExceptionHandler(ResourceNotFoundException.class)
     protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
         return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getResourceId())),
@@ -51,10 +53,10 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
-    
+
     @ExceptionHandler(value = ConflictException.class)
     protected ResponseEntity<Object> handleConflictException(ConflictException e, WebRequest request) {
-        if (e.getConflictingItems() != null && !e.getConflictingItems().isEmpty()) {            
+        if (e.getConflictingItems() != null && !e.getConflictingItems().isEmpty()) {
             return handleExceptionInternal(e, new ErrorResource(e.getMessage(), e.getDetail(), e.getConflictingItems()),
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
         } else {
@@ -96,11 +98,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      * @param headers {@inheritDoc}
      * @param status  {@inheritDoc}
      * @param request {@inheritDoc}
-     * @return 
+     * @return
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        
+
         if (body == null) {
             if (!suppressErrors) {
                 //if not suppress errors, then show the whole stack trace to the client
