@@ -6,12 +6,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,37 +57,37 @@ public class FeedbackAutoConfiguration {
     @ConditionalOnWebApplication
     @ConditionalOnClass({FeedbackController.class, RestController.class, ResourceAssembler.class, ObjectMapper.class})
     public static class FeedbackAutoConfigurationWeb {
-        
+
         @Bean
         public FeedbackController feedbackController(FeedbackDelegate feedbackDelegate) {
             return new FeedbackController(feedbackDelegate);
         }
-        
+
         @Bean
         public FeedbackResourceAssembler feedbackResourceAssembler() {
             return new FeedbackResourceAssembler();
         }
-        
+
         @Bean
         public Function<FeedbackResource, Feedback> feedbackResourceToValue() {
             return FeedbackAdaptor::new;
         }
-        
+
         @Bean
         FeedbackDelegate feedbackDelegate(FeedbackFactory feedbackFactory,
                                           FeedbackRepository feedbackRepository,
                                           AccessAuditRepository accessAuditRepository,
                                           FeedbackResourceAssembler feedbackResourceAssembler,
                                           Function<FeedbackResource, Feedback> feedbackResourceToValue) {
-            
+
             return new FeedbackDelegate(feedbackFactory,
                                         feedbackRepository,
                                         accessAuditRepository,
                                         feedbackResourceAssembler,
                                         feedbackResourceToValue);
         }
-        
-        
+
+
     }
 
 }

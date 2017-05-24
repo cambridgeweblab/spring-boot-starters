@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,10 +46,9 @@ import static org.mockito.Mockito.when;
  * Integration test to make sure that injected form key handler ordering in ActionDecorator works as expected.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration
+@Import(ActionCommandAutoConfiguration.class)
 public class ActionDecorator_IT {
     @Configuration
-    @Import(ActionCommandAutoConfiguration.class)
     public static class Config {
         @Bean
         CrossContextConversionService crossContextConversionService() {

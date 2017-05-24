@@ -8,9 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -82,14 +82,14 @@ public class CrossContextAutoConfiguration {
                 ControllerIntrospectingCrossContextConverter converter, ObjectMapper objectMapper) {
             return new HandlerMethodInvokingCrossContextResolver(converter, objectMapper);
         }
-        
+
         @Bean
         RestCrossContextConverter restCrossContextConverter(RestSettings restSettings) {
             return new RestCrossContextConverter(restSettings);
         }
-        
+
         @Bean
-        RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter,                                                          
+        RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter,
                                                           ObjectMapper objectMapper) {
             return new RestCrossContextResolver(converter, new RestTemplate(), objectMapper);
         }
@@ -105,7 +105,7 @@ public class CrossContextAutoConfiguration {
         }
 
         @Bean
-        CommandLineRunner registerHandlerMethodInvokingCrossContextResolverWithResolverService(HandlerMethodInvokingCrossContextResolver handlerMethodInvokingCrossContextResolver, 
+        CommandLineRunner registerHandlerMethodInvokingCrossContextResolverWithResolverService(HandlerMethodInvokingCrossContextResolver handlerMethodInvokingCrossContextResolver,
                                                                                                 RestCrossContextResolver restCrossContextResolver) {
             return args -> {
                 crossContextResolverService.addResolver(handlerMethodInvokingCrossContextResolver);

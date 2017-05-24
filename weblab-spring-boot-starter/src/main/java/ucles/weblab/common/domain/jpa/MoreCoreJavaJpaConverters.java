@@ -1,7 +1,5 @@
 package ucles.weblab.common.domain.jpa;
 
-import org.springframework.boot.orm.jpa.EntityScan;
-
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -13,7 +11,7 @@ import javax.persistence.Converter;
  * JPA 2.1 converter to turn {@link java.net.URI}, {@link java.net.InetAddress} and {@link java.util.Currency} types
  * into {@link java.lang.String Strings} for persistence.
  * To activate these converters, make sure your persistence provider detects it by including this class in the list of
- * mapped classes e.g. with the annotation property {@link EntityScan#basePackages()}.
+ * mapped classes e.g. with the annotation property {@link org.springframework.boot.autoconfigure.domain.EntityScan#basePackages()}.
  * <p>
  * Currencies are persisted using their ISO 4217 currency codes.
  * </p>
