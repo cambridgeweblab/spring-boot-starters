@@ -13,6 +13,7 @@ import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.util.UriComponentsBuilder;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.webapi.ActionCommand;
@@ -263,9 +265,10 @@ public class ActionDecorator implements BeanFactoryAware {
                         .flatMap(p -> p.getStartFormFields().stream());
                 Map<String, String> parameters = evaluateWorkflowVariables(resource, actionCommand.workFlowVariables());
 
+                final ControllerLinkBuilder actionLink = linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null));
                 final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
-                        linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null))
-                                .toUriComponentsBuilder().replaceQuery(null).build(true).toUri(), // strip parameters
+                        UriComponentsBuilder.fromUriString(actionLink.toString())
+                                .replaceQuery(null).build(true).toUri(), // strip parameters
                         actionCommand.title().isEmpty()? actionCommand.message() : actionCommand.title(),
                         actionCommand.description(),
                         formFieldSchemaCreator.createSchema(fields, parameters)

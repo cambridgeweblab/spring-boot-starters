@@ -20,9 +20,11 @@ import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.test.webapi.WebTestSupport;
+import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.webapi.LinkRelation;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
+import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
@@ -103,6 +105,9 @@ public class ActionDecorator_IT {
     @Autowired
     WorkflowTaskRepository workflowTaskRepository;
 
+    @Autowired
+    DeployedWorkflowProcessRepository deployedWorkflowProcessRepository;
+
     @Before
     public void setUp() throws Exception {
         WebTestSupport.setUpRequestContext();
@@ -126,6 +131,15 @@ public class ActionDecorator_IT {
 
         ActionableResourceSupport.Action action = actionDecorator.processWorkflowTaskAction(task, "blahdiblah", Collections.emptyMap());
         assertEquals("Expect empty schema actions", 0, action.getSchema().asObjectSchema().getProperties().size());
+    }
+
+    @Test
+    public void testNewWorkflowMessage() {
+        DeployedWorkflowProcessEntity process = mock(DeployedWorkflowProcessEntity.class);
+        when(deployedWorkflowProcessRepository.findAllByStartMessage("dummy action")).thenReturn((List) Collections.singletonList(process));
+        final DummyActionableResource resource = new DummyActionableResource();
+        actionDecorator.processResource(resource);
+        assertTrue("Expect an action link to 'dummy action'", resource.getLinks().stream().anyMatch(l -> l.getRel().startsWith("action:") && l.getHref().contains("dummy%20action")));
     }
 
     @Test
@@ -163,7 +177,9 @@ public class ActionDecorator_IT {
         }
     }
 
-    @ActionCommands(businessKey = "#{ginaKey}")
+    @ActionCommands(businessKey = "#{ginaKey}", value = {
+            @ActionCommand(name = "dummyAction", message = "dummy action", createNewKey = true)
+    })
     static class DummyActionableResource extends ActionableResourceSupport {
         private URI ginaKey = URI.create("ooh:aah");
 
