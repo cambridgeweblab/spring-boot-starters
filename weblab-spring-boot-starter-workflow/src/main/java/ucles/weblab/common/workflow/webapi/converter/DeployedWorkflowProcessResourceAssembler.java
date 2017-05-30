@@ -31,8 +31,10 @@ public class DeployedWorkflowProcessResourceAssembler implements ResourceAssembl
 
         resource.add(linkTo(methodOn(WorkflowController.class).updateModelForProcess(entity.getId(), resource)).withSelfRel());
         resource.add(new Link(linkTo(methodOn(WorkflowController.class).returnBpmn20ForProcessDefinition(entity.getId()))
+                // TODO: validate that toUriComponentsBuilder() is OK and doesn't need replacing with UriComponentsBuilder.fromUriString(...toString()) to avoid double-encoding.
                 .toUriComponentsBuilder().toUriString() + ".xml", LinkRelation.CANONICAL.rel()));
         resource.add(new Link(linkTo(methodOn(WorkflowController.class).returnBpmn20ForProcessDefinition(entity.getId()))
+                // TODO: validate that toUriComponentsBuilder() is OK and doesn't need replacing with UriComponentsBuilder.fromUriString(...toString()) to avoid double-encoding.
                 .toUriComponentsBuilder().toUriString() + ".png", LinkRelation.ALTERNATE.rel()));
         return resource;
     }

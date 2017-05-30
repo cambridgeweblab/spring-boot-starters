@@ -31,6 +31,7 @@ public class EditableWorkflowProcessResourceAssembler implements ResourceAssembl
         final StaticLinkBuilder linkBuilder = new StaticLinkBuilder(builder);
         resource.add(linkBuilder.slash("modeler.html?modelId=" + entity.getId()).withRel(LinkRelation.EDIT_FORM.rel()));
         resource.add(new Link(linkTo(methodOn(WorkflowController.class).returnBpmn20XmlForModel(entity.getId()))
+                // TODO: validate that toUriComponentsBuilder() is OK and doesn't need replacing with UriComponentsBuilder.fromUriString(...toString()) to avoid double-encoding.
                 .toUriComponentsBuilder().toUriString() + ".xml", LinkRelation.CANONICAL.rel()));
         resource.add(new TitledLink(linkTo(methodOn(WorkflowController.class).deleteExistingModel(entity.getId())),
                 "delete", null, HttpMethod.DELETE.name()));

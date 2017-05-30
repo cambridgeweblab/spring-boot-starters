@@ -197,6 +197,7 @@ public class ActionDecorator implements BeanFactoryAware {
         }
 
         final RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+        // TODO: validate that toUriComponentsBuilder() is OK and doesn't need replacing with UriComponentsBuilder.fromUriString(...toString()) to avoid double-encoding.
         URI href = linkTo(actionCommand.controller(), method, arguments).toUriComponentsBuilder().replaceQuery(null).build(true).toUri();
         // This linkTo() method doesn't handle trailing slashes on URLs very well, so fix it.
         if (requestMapping.path()[0].endsWith("/")) {

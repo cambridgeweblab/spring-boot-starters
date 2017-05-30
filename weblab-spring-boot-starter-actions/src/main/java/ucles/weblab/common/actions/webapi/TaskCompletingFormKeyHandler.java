@@ -25,6 +25,7 @@ public abstract class TaskCompletingFormKeyHandler implements FormKeyHandler {
     public ActionableResourceSupport.Action createAction(WorkflowTaskEntity task, String businessKey, Map<String, String> parameters) {
         ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
                 linkTo(methodOn(ActionAwareWorkflowController.class).completeTask(businessKey, task.getId(), parameters, null))
+                        // TODO: validate that toUriComponentsBuilder() is OK and doesn't need replacing with UriComponentsBuilder.fromUriString(...toString()) to avoid double-encoding.
                         .toUriComponentsBuilder()
                         .replaceQuery(null)
                         .build(true).toUri(),
