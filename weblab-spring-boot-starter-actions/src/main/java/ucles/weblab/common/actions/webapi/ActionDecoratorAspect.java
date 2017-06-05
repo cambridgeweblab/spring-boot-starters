@@ -3,6 +3,7 @@ package ucles.weblab.common.actions.webapi;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.webapi.resource.ResourceListWrapper;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -70,12 +72,14 @@ public class ActionDecoratorAspect {
     public void addActionsToMultipleResources(ResourceListWrapper<? extends ActionableResourceSupport> resourceList) {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        final Locale locale = LocaleContextHolder.getLocaleContext().getLocale();
         final Set<Thread> propagated = new CopyOnWriteArraySet<>(singleton(Thread.currentThread()));
         resourceList.getList().parallelStream().forEach((resource) -> {
             if (propagated.add(Thread.currentThread())) {
-                // Propagate authentication and request into parallel stream handler since it is thread-bound...
+                // Propagate authentication, locale and request into parallel stream handler since it is thread-bound...
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 RequestContextHolder.setRequestAttributes(requestAttributes);
+                LocaleContextHolder.setLocale(locale);
             }
             actionDecorator.processResource(resource);
         });
