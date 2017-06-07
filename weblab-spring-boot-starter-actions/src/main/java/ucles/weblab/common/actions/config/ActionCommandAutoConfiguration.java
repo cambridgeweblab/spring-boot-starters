@@ -59,13 +59,13 @@ public class ActionCommandAutoConfiguration {
     }
 
     @Bean
-    FormKeyHandler defaultFormKeyHandler(FormFieldSchemaCreator formFieldSchemaCreator) {
-        return new DefaultFormKeyHandler(formFieldSchemaCreator);
+    FormKeyHandler defaultFormKeyHandler(LocalisationService localisationService, FormFieldSchemaCreator formFieldSchemaCreator) {
+        return new DefaultFormKeyHandler(localisationService, formFieldSchemaCreator);
     }
 
     @Bean
-    FormKeyHandler schemaFormKeyHandler(ResourceSchemaCreator resourceSchemaCreator) {
-        return new SchemaFormKeyHandler(resourceSchemaCreator);
+    FormKeyHandler schemaFormKeyHandler(LocalisationService localisationService, ResourceSchemaCreator resourceSchemaCreator) {
+        return new SchemaFormKeyHandler(localisationService, resourceSchemaCreator);
     }
 
     @Bean

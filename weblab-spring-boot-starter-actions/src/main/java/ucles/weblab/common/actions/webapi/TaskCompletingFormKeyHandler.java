@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 
@@ -20,6 +21,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 public abstract class TaskCompletingFormKeyHandler implements FormKeyHandler {
     protected Logger log = LoggerFactory.getLogger(getClass());
+    private final LocalisationService localisationService;
+
+    protected TaskCompletingFormKeyHandler(LocalisationService localisationService) {
+        this.localisationService = localisationService;
+    }
 
     @Override
     public ActionableResourceSupport.Action createAction(WorkflowTaskEntity task, String businessKey, Map<String, String> parameters) {
@@ -35,6 +41,12 @@ public abstract class TaskCompletingFormKeyHandler implements FormKeyHandler {
         action.setMethod(HttpMethod.POST.toString());
         action.setTargetSchema(new NullSchema());
         action.setRel(task.getId());
+
+        // TODO: provide a means to qualify this by process ID as well as task ID
+        String keyBase = "wf." + task.getId();
+        localisationService.ifMessagePresent(keyBase + ".name", action::setTitle);
+        localisationService.ifMessagePresent(keyBase + ".desc", action::setDescription);
+
         return action;
     }
 

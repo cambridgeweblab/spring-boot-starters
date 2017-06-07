@@ -1,6 +1,7 @@
 package ucles.weblab.common.actions.webapi;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
 
@@ -13,7 +14,8 @@ import java.util.stream.Stream;
 public class DefaultFormKeyHandler extends TaskCompletingFormKeyHandler {
     private final FormFieldSchemaCreator formFieldSchemaCreator;
 
-    public DefaultFormKeyHandler(FormFieldSchemaCreator formFieldSchemaCreator) {
+    public DefaultFormKeyHandler(LocalisationService localisationService, FormFieldSchemaCreator formFieldSchemaCreator) {
+        super(localisationService);
         this.formFieldSchemaCreator = formFieldSchemaCreator;
     }
 

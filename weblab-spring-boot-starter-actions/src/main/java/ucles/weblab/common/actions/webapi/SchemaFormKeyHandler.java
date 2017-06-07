@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 
@@ -28,7 +29,8 @@ public class SchemaFormKeyHandler extends TaskCompletingFormKeyHandler {
     private static final Pattern SCHEMA_FORM_KEY = Pattern.compile("^schema:([a-z]+):(.*)$");
     private final ResourceSchemaCreator resourceSchemaCreator;
 
-    public SchemaFormKeyHandler(ResourceSchemaCreator resourceSchemaCreator) {
+    public SchemaFormKeyHandler(LocalisationService localisationService, ResourceSchemaCreator resourceSchemaCreator) {
+        super(localisationService);
         this.resourceSchemaCreator = resourceSchemaCreator;
     }
 
