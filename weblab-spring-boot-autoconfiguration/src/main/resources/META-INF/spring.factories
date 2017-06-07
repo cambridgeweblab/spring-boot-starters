@@ -7,4 +7,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   ucles.weblab.common.config.forms.FormsAutoConfiguration,\
   ucles.weblab.common.config.feedback.FeedbackAutoConfiguration,\
   ucles.weblab.common.config.schema.SchemaCreatorAutoConfiguration,\
-  ucles.weblab.common.config.xc.CrossContextAutoConfiguration
+  ucles.weblab.common.config.xc.CrossContextAutoConfiguration,\
+  ucles.weblab.common.config.i18n.LocalisationAutoConfiguration

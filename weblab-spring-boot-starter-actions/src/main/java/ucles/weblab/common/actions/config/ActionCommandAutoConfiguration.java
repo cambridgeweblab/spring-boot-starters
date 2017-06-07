@@ -10,10 +10,10 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.actions.webapi.*;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
 import ucles.weblab.common.security.SecurityChecker;
@@ -45,7 +45,8 @@ public class ActionCommandAutoConfiguration {
                                     ResourceSchemaCreator schemaCreator,
                                     WorkflowTaskRepository workflowTaskRepository,
                                     FormFieldSchemaCreator formFieldSchemaCreator,
-                                    Optional<List<FormKeyHandler>> formKeyHandlers) {
+                                    Optional<List<FormKeyHandler>> formKeyHandlers,
+                                    LocalisationService localisationService) {
 
         return new ActionDecorator(securityChecker,
                 deployedWorkflowProcessRepository,
@@ -53,7 +54,8 @@ public class ActionCommandAutoConfiguration {
                 crossContextConversionService,
                 schemaCreator,
                 formFieldSchemaCreator,
-                formKeyHandlers);
+                formKeyHandlers,
+                localisationService);
     }
 
     @Bean

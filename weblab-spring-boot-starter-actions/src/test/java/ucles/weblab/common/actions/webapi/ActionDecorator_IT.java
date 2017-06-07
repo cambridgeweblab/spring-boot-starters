@@ -16,6 +16,8 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ucles.weblab.common.actions.config.ActionCommandAutoConfiguration;
+import ucles.weblab.common.i18n.service.LocalisationService;
+import ucles.weblab.common.i18n.service.impl.LocalisationServiceImpl;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
@@ -32,15 +34,12 @@ import ucles.weblab.common.xc.service.CrossContextConversionService;
 import ucles.weblab.common.xc.service.CrossContextConversionServiceImpl;
 
 import javax.validation.constraints.Pattern;
-
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -83,14 +82,19 @@ public class ActionDecorator_IT {
                                                     CrossContextConversionService crossContextConversionService,
                                                     EnumSchemaCreator enumSchemaCreator,
                                                     JsonSchemaFactory jsonSchemaFactory,
-                                                    MessageSource messageSource) {
+                                                    LocalisationService localisationService) {
             return new ResourceSchemaCreator(securityChecker, new ObjectMapper(), crossContextConversionService,
-                    enumSchemaCreator, jsonSchemaFactory, messageSource);
+                    enumSchemaCreator, jsonSchemaFactory, localisationService);
         }
 
         @Bean
         DeployedWorkflowProcessRepository deployedWorkflowProcessRepository() {
             return mock(DeployedWorkflowProcessRepository.class);
+        }
+
+        @Bean
+        LocalisationService localisationService(MessageSource messageSource) {
+            return new LocalisationServiceImpl(messageSource);
         }
 
         @Bean

@@ -3,9 +3,7 @@ package ucles.weblab.common.actions.webapi;
 import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.Expression;
@@ -24,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.util.UriComponentsBuilder;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.webapi.ActionCommand;
@@ -45,7 +44,6 @@ import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.security.Principal;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import ucles.weblab.common.webapi.TitledLink;
 
@@ -62,6 +60,7 @@ public class ActionDecorator extends ApplicationObjectSupport {
     private final CrossContextConversionService crossContextConversionService;
     private final ResourceSchemaCreator resourceSchemaCreator;
     private final FormFieldSchemaCreator formFieldSchemaCreator;
+    private final LocalisationService localisationService;
 
     private Collection<FormKeyHandler> formKeyHandlers;
 
@@ -71,7 +70,8 @@ public class ActionDecorator extends ApplicationObjectSupport {
                            CrossContextConversionService crossContextConversionService,
                            ResourceSchemaCreator resourceSchemaCreator,
                            FormFieldSchemaCreator formFieldSchemaCreator,
-                           Optional<List<FormKeyHandler>> formKeyHandlers) {
+                           Optional<List<FormKeyHandler>> formKeyHandlers,
+                           LocalisationService localisationService) {
 
         this.securityChecker = securityChecker;
         this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
@@ -79,6 +79,7 @@ public class ActionDecorator extends ApplicationObjectSupport {
         this.crossContextConversionService = crossContextConversionService;
         this.resourceSchemaCreator = resourceSchemaCreator;
         this.formFieldSchemaCreator = formFieldSchemaCreator;
+        this.localisationService = localisationService;
         if (log.isInfoEnabled()) {
             formKeyHandlers.ifPresent(hs -> {
                 for (FormKeyHandler formKeyHandler : hs) {
@@ -208,22 +209,8 @@ public class ActionDecorator extends ApplicationObjectSupport {
         action.setMethod((requestMapping.method().length > 0 ? requestMapping.method()[0] : HttpMethod.POST).toString());
         action.setTargetSchema(new NullSchema());
         action.setRel(actionCommand.name());
-        if (!actionCommand.titleKey().isEmpty()) lookupMessage(actionCommand.titleKey(), action::setTitle);
+        if (!actionCommand.titleKey().isEmpty()) localisationService.ifMessagePresent(actionCommand.titleKey(), action::setTitle);
         return Optional.of(action);
-    }
-
-    /**
-     * Lookup key in messages for current {@link java.util.Locale} and if found apply the result to <code>target</code>
-     * @param key message key
-     * @param target consumer that will be supplied with the message lookup result if found
-     */
-    private void lookupMessage(String key, Consumer<String> target) {
-        try {
-            String translated = getMessageSourceAccessor().getMessage(key); // will use current thread locale
-            target.accept(translated);
-        } catch (NoSuchMessageException e) {
-            log.trace("No message found for key: {} for locale {}", key, LocaleContextHolder.getLocale());
-        }
     }
 
     private Method findControllerMethod(ActionCommand actionCommand) {
@@ -288,7 +275,7 @@ public class ActionDecorator extends ApplicationObjectSupport {
                 action.setMethod(HttpMethod.POST.toString());
                 action.setTargetSchema(new NullSchema());
                 action.setRel(actionCommand.name());
-                if (!actionCommand.titleKey().isEmpty()) lookupMessage(actionCommand.titleKey(), action::setTitle);
+                if (!actionCommand.titleKey().isEmpty()) localisationService.ifMessagePresent(actionCommand.titleKey(), action::setTitle);
                 return Optional.of(action);
             } else {
                 log.debug("Found a workflow action command but there was already a process with the business key");

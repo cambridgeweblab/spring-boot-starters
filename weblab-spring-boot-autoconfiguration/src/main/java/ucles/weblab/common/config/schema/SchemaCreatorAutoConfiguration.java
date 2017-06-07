@@ -7,16 +7,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.context.SecurityContextHolder;
+import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.schema.webapi.ControllerMethodSchemaCreator;
-import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
+import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
 /**
@@ -47,9 +47,9 @@ public class SchemaCreatorAutoConfiguration {
                                         CrossContextConversionService crossContextConversionService,
                                         EnumSchemaCreator enumSchemaCreator,
                                         JsonSchemaFactory schemaFactory,
-                                        MessageSource messageSource) {
+                                        LocalisationService localisationService) {
         return new ResourceSchemaCreator(securityChecker, objectMapper, crossContextConversionService,
-                enumSchemaCreator, schemaFactory, messageSource);
+                enumSchemaCreator, schemaFactory, localisationService);
     }
 
     @Bean
@@ -61,8 +61,8 @@ public class SchemaCreatorAutoConfiguration {
     ControllerMethodSchemaCreator controllerMethodSchemaCreator(ObjectMapper objectMapper,
                                                                 CrossContextConversionService crossContextConversionService,
                                                                 EnumSchemaCreator enumSchemaCreator,
-                                                                MessageSource messageSource) {
-        return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator, messageSource);
+                                                                LocalisationService localisationService) {
+        return new ControllerMethodSchemaCreator(objectMapper, crossContextConversionService, enumSchemaCreator, localisationService);
     }
 
     @Bean
