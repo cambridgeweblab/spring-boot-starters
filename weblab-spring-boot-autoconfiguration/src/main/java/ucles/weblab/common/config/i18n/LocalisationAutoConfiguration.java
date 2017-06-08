@@ -14,7 +14,6 @@ import ucles.weblab.common.i18n.service.impl.LocalisationServiceImpl;
  * @since 07/10/15
  */
 @Configuration
-@ConditionalOnBean({ MessageSource.class })
 @ConditionalOnClass({ LocalisationServiceImpl.class })
 public class LocalisationAutoConfiguration {
     @Bean
