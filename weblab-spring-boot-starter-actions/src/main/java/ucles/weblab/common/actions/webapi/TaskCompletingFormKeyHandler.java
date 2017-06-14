@@ -42,8 +42,7 @@ public abstract class TaskCompletingFormKeyHandler implements FormKeyHandler {
         action.setTargetSchema(new NullSchema());
         action.setRel(task.getId());
 
-        // TODO: provide a means to qualify this by process ID as well as task ID
-        String keyBase = "wf." + task.getId();
+        String keyBase = "wf." + task.getProcessKey() + '.' + task.getTaskDefinitionKey();
         localisationService.ifMessagePresent(keyBase + ".name", action::setTitle);
         localisationService.ifMessagePresent(keyBase + ".desc", action::setDescription);
 

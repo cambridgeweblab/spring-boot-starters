@@ -12,6 +12,12 @@ import java.util.List;
 public interface WorkflowTaskAggregate extends WorkflowTask, Buildable<WorkflowTaskAggregate> {
     String getFormKey();
 
+    /** unique name for all versions of this task definition within its owning process */
+    String getTaskDefinitionKey();
+
+    /** unique name for all versions of this process definitions */
+    String getProcessKey();
+
     List<? extends WorkflowTaskFormField> getFormFields();
 
     WorkflowTaskContext getContext();

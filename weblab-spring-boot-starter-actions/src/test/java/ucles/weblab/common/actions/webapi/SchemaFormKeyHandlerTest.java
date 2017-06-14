@@ -128,12 +128,14 @@ public class SchemaFormKeyHandlerTest {
         when(task.getId()).thenReturn(UUID.randomUUID().toString());
         when(task.getName()).thenReturn("Untranslated name");
         when(task.getDescription()).thenReturn("Untranslated description");
+        when(task.getProcessKey()).thenReturn("wf-process");
+        when(task.getTaskDefinitionKey()).thenReturn("wf-task");
         ObjectSchema schema = schemaProvider.objectSchema();
         schema.setId("urn:" + task.getId());
-        staticMessageSource.addMessage("wf." + task.getId() + ".name", Locale.ENGLISH, "Task that needs doing");
-        staticMessageSource.addMessage("wf." + task.getId() + ".desc", Locale.ENGLISH, "You really need to do this in order to proceed.");
-        staticMessageSource.addMessage("wf." + task.getId() + ".name", Locale.ITALIAN, "Attività che ha bisogno di fare");
-        staticMessageSource.addMessage("wf." + task.getId() + ".desc", Locale.ITALIAN, "È veramente necessario farlo per procedere.");
+        staticMessageSource.addMessage("wf.wf-process.wf-task.name", Locale.ENGLISH, "Task that needs doing");
+        staticMessageSource.addMessage("wf.wf-process.wf-task.desc", Locale.ENGLISH, "You really need to do this in order to proceed.");
+        staticMessageSource.addMessage("wf.wf-process.wf-task.name", Locale.ITALIAN, "Attività che ha bisogno di fare");
+        staticMessageSource.addMessage("wf.wf-process.wf-task.desc", Locale.ITALIAN, "È veramente necessario farlo per procedere.");
 
         when(resourceSchemaCreator.create(same((Class) resource), any(URI.class), any(Optional.class), any(Optional.class)))
                 .thenReturn(schema);

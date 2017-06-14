@@ -76,6 +76,16 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     }
 
     @Override
+    public String getTaskDefinitionKey() {
+        return task.getTaskDefinitionKey();
+    }
+
+    @Override
+    public String getProcessKey() {
+        return task.getProcessDefinitionId().substring(0, task.getProcessDefinitionId().indexOf(':'));
+    }
+
+    @Override
     public List<? extends WorkflowTaskFormField> getFormFields() {
         // See also formProperty.getType().getInformation("datePattern") and formProperty.getType().getInformation("values")
         Function<FormType, WorkflowTaskFormField.FormFieldType> typeMapper = t ->
