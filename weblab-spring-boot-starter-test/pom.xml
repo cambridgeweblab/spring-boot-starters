@@ -12,6 +12,10 @@
     <artifactId>weblab-spring-boot-starter-test</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <auth0-spring-security-api.version>1.0.0-rc.2</auth0-spring-security-api.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -30,6 +34,18 @@
         <dependency>
             <groupId>org.springframework.hateoas</groupId>
             <artifactId>spring-hateoas</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- SECURITY CONTEXT -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>auth0-spring-security-api</artifactId>
+            <version>${auth0-spring-security-api.version}</version>
             <optional>true</optional>
         </dependency>
         <!--<dependency>
