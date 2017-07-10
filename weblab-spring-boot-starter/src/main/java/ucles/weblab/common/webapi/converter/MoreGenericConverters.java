@@ -2,6 +2,7 @@ package ucles.weblab.common.webapi.converter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,7 +28,9 @@ import java.util.Set;
 public class MoreGenericConverters {
 
     @Bean
-    public OptionalToObjectConverter optionalToObjectConverter(ConversionService conversionService) {
+    @ConditionalOnBean(name = "mvcConversionService")
+    public OptionalToObjectConverter optionalToObjectConverter(
+            @Qualifier("mvcConversionService") ConversionService conversionService) {
         return new OptionalToObjectConverter(conversionService);
     }
 
