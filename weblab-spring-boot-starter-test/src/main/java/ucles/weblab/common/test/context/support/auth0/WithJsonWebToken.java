@@ -26,6 +26,10 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 @WithSecurityContext(factory = WithJsonWebToken.WithJsonWebTokenSecurityContextFactory.class)
+/**
+ * Provides auth using a JWT.
+ * Note that spring-security-test dependency is required on the test classpath for this to work
+ */
 public @interface WithJsonWebToken {
     String value();
 
