@@ -11,17 +11,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ucles.weblab.common.webapi.exception.ReferencedEntityNotFoundException;
-import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
-import ucles.weblab.common.webapi.exception.UnknownRefererException;
+import ucles.weblab.common.webapi.exception.*;
 import ucles.weblab.common.webapi.resource.ErrorResource;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.springframework.beans.factory.annotation.Value;
-import ucles.weblab.common.webapi.exception.ConflictException;
-
-import javax.ws.rs.ForbiddenException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
