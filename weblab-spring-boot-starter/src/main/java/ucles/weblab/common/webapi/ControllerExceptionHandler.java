@@ -21,6 +21,8 @@ import java.io.StringWriter;
 import org.springframework.beans.factory.annotation.Value;
 import ucles.weblab.common.webapi.exception.ConflictException;
 
+import javax.ws.rs.ForbiddenException;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 /**
@@ -36,6 +38,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Value("${suppress.errors:true}")
     private boolean suppressErrors;
+
+    @ExceptionHandler(ForbiddenException.class)
+    protected ResponseEntity<Object> handleForbiddenException(ForbiddenException e, WebRequest request) {
+        return handleExceptionInternal(e, null, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
