@@ -107,6 +107,9 @@ public class ActionDecorator_IT {
     ActionDecorator actionDecorator;
 
     @Autowired
+    WorkflowActionDelegate workflowActionDelegate;
+
+    @Autowired
     WorkflowTaskRepository workflowTaskRepository;
 
     @Autowired
@@ -123,7 +126,7 @@ public class ActionDecorator_IT {
         when(task.getFormKey()).thenReturn("schema:resource:" + DummyResource.class.getName());
         when(task.getId()).thenReturn(UUID.randomUUID().toString());
 
-        ActionableResourceSupport.Action action = actionDecorator.processWorkflowTaskAction(task, "blahdiblah", Collections.emptyMap());
+        ActionableResourceSupport.Action action = workflowActionDelegate.processWorkflowTaskAction(task, "blahdiblah", Collections.emptyMap());
         assertNotNull("Expect resource-based action", action.getSchema().asObjectSchema().getProperties().get("galacticSuperhighway"));
     }
 
@@ -133,7 +136,7 @@ public class ActionDecorator_IT {
         when(task.getFormKey()).thenReturn("unrecognised");
         when(task.getId()).thenReturn(UUID.randomUUID().toString());
 
-        ActionableResourceSupport.Action action = actionDecorator.processWorkflowTaskAction(task, "blahdiblah", Collections.emptyMap());
+        ActionableResourceSupport.Action action = workflowActionDelegate.processWorkflowTaskAction(task, "blahdiblah", Collections.emptyMap());
         assertEquals("Expect empty schema actions", 0, action.getSchema().asObjectSchema().getProperties().size());
     }
 

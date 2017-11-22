@@ -3,15 +3,8 @@ package ucles.weblab.common.actions.webapi;
 import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.expression.Expression;
-import org.springframework.expression.common.TemplateParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -21,22 +14,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethodSelector;
-import org.springframework.web.util.UriComponentsBuilder;
 import ucles.weblab.common.i18n.service.LocalisationService;
-import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
+import ucles.weblab.common.security.SecurityChecker;
 import ucles.weblab.common.webapi.ActionCommand;
 import ucles.weblab.common.webapi.ActionCommands;
-import ucles.weblab.common.webapi.ActionParameter;
-import ucles.weblab.common.webapi.ActionParameterNameValue;
-import ucles.weblab.common.webapi.LinkRelation;
+import ucles.weblab.common.webapi.TitledLink;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
-import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
-import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessRepository;
-import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
-import ucles.weblab.common.workflow.domain.WorkflowTaskFormField;
-import ucles.weblab.common.workflow.domain.WorkflowTaskRepository;
-import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.xc.service.CrossContextConversionService;
 
 import java.lang.reflect.Method;
@@ -44,50 +28,31 @@ import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Stream;
-import ucles.weblab.common.webapi.TitledLink;
 
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-public class ActionDecorator extends ApplicationObjectSupport {
+public class ActionDecorator {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final SecurityChecker securityChecker;
-    private final DeployedWorkflowProcessRepository deployedWorkflowProcessRepository;
-    private final WorkflowTaskRepository workflowTaskRepository;
     private final CrossContextConversionService crossContextConversionService;
     private final ResourceSchemaCreator resourceSchemaCreator;
-    private final FormFieldSchemaCreator formFieldSchemaCreator;
     private final LocalisationService localisationService;
-
-    private Collection<FormKeyHandler> formKeyHandlers;
+    // This delegate will be present iff workflow classes are available on the classpath.
+    private final Optional<WorkflowActionDelegate> workflowActionDelegate;
+    private final ExpressionEvaluator expressionEvaluator;
 
     public ActionDecorator(SecurityChecker securityChecker,
-                           DeployedWorkflowProcessRepository deployedWorkflowProcessRepository,
-                           WorkflowTaskRepository workflowTaskRepository,
                            CrossContextConversionService crossContextConversionService,
                            ResourceSchemaCreator resourceSchemaCreator,
-                           FormFieldSchemaCreator formFieldSchemaCreator,
-                           Optional<List<FormKeyHandler>> formKeyHandlers,
-                           LocalisationService localisationService) {
+                           LocalisationService localisationService,
+                           ExpressionEvaluator expressionEvaluator, Optional<WorkflowActionDelegate> workflowActionDelegate) {
 
         this.securityChecker = securityChecker;
-        this.deployedWorkflowProcessRepository = deployedWorkflowProcessRepository;
-        this.workflowTaskRepository = workflowTaskRepository;
         this.crossContextConversionService = crossContextConversionService;
         this.resourceSchemaCreator = resourceSchemaCreator;
-        this.formFieldSchemaCreator = formFieldSchemaCreator;
         this.localisationService = localisationService;
-        if (log.isInfoEnabled()) {
-            formKeyHandlers.ifPresent(hs -> {
-                for (FormKeyHandler formKeyHandler : hs) {
-                    log.info("Registering workflow form key handler: " + formKeyHandler.getName());
-                }
-            });
-        }
-        this.formKeyHandlers = formKeyHandlers.orElse(Collections.emptyList());
+        this.expressionEvaluator = expressionEvaluator;
+        this.workflowActionDelegate = workflowActionDelegate;
     }
 
     void processResource(ActionableResourceSupport resource) {
@@ -100,12 +65,13 @@ public class ActionDecorator extends ApplicationObjectSupport {
 
         final ActionCommands actionCommands = AnnotationUtils.findAnnotation(resource.getClass(), ActionCommands.class);
         if (actionCommands != null && !actionCommands.businessKey().isEmpty()) {
-            final Object businessKey = evaluateExpression(resource, actionCommands.businessKey());
+            final Object businessKey = expressionEvaluator.evaluateExpression(resource, actionCommands.businessKey());
             if (!StringUtils.isEmpty(businessKey)) {
-                processExistingWorkflowTaskActions(resource, Optional.empty(), URI.create(businessKey.toString())).forEach(actions::add);
-                // Add a history link to the workflow audit trail.
-                resource.add(new TitledLink(linkTo(methodOn(WorkflowController.class).listWorkflowAudit(businessKey.toString())),
-                        LinkRelation.ARCHIVES.rel(), "History", HttpMethod.GET.name()));
+                workflowActionDelegate.ifPresent(delegate ->
+                    delegate.processExistingWorkflowTaskActions(resource, Optional.empty(), URI.create(businessKey.toString()), true).forEach(actions::add));
+                if (!workflowActionDelegate.isPresent()) {
+                    log.warn("ActionCommands declares a business key but no workflow engine is available to process it.");
+                }
             }
         }
 
@@ -122,10 +88,13 @@ public class ActionDecorator extends ApplicationObjectSupport {
                         } else {
                             businessKey = crossContextConversionService.asUrn(URI.create(resource.getId().getHref()));
                         }
-
-                        processWorkflowAction(resource, actionCommand, businessKey).ifPresent(actions::add);
-                        processExistingWorkflowTaskActions(resource, Optional.of(actionCommand), businessKey).forEach(actions::add);
-
+                        workflowActionDelegate.ifPresent(delegate -> {
+                            delegate.processWorkflowAction(resource, actionCommand, businessKey).ifPresent(actions::add);
+                            delegate.processExistingWorkflowTaskActions(resource, Optional.of(actionCommand), businessKey, false).forEach(actions::add);
+                        });
+                        if (!workflowActionDelegate.isPresent()) {
+                            log.error("Action command {} requires workflow but no workflow engine is available to process it.");
+                        }
                     } else if (Void.class != actionCommand.controller()) {
                         // TODO: Also check authorization on the controller method itself.
                         processControllerAction(resource, actionCommand).ifPresent(actions::add);
@@ -148,28 +117,6 @@ public class ActionDecorator extends ApplicationObjectSupport {
                     resource.add(tl);
             });
         }
-    }
-
-    protected Stream<ActionableResourceSupport.Action> processExistingWorkflowTaskActions(ActionableResourceSupport resource, Optional<ActionCommand> actionCommand, URI businessKey) {
-        final List<? extends WorkflowTaskEntity> tasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey.toString());
-        // Also check for any existing workflow tasks for this resource
-        // TODO: Demoware - this does not restrict by audience, so everyone sees all tasks
-        Map<String, String> parameters = actionCommand.map(cmd -> evaluateWorkflowVariables(resource, cmd.workFlowVariables()))
-                .orElse(emptyMap());
-
-        return tasks.stream()
-                .map(t -> processWorkflowTaskAction(t, businessKey.toString(), parameters));
-    }
-
-    private Map<String,String> evaluateWorkflowVariables(ActionableResourceSupport resource, ActionParameterNameValue[] workFlowVariables) {
-        //evaluate the values using spring
-        Map<String, String> parameters = new HashMap<>();
-        for (ActionParameterNameValue v : workFlowVariables) {
-            Object value = evaluateExpression(resource, v.value());
-            parameters.put(v.name(), value.toString());
-        }
-
-        return parameters;
     }
 
     private Optional<ActionableResourceSupport.Action> processControllerAction(ActionableResourceSupport resource, ActionCommand actionCommand) {
@@ -226,7 +173,7 @@ public class ActionDecorator extends ApplicationObjectSupport {
     private Object[] evaluateControllerMethodArguments(final ActionableResourceSupport resource, ActionCommand actionCommand, Method method, Parameter[] parameters) {
         final Object[] arguments = new Object[parameters.length];
         final Iterator<Object> pathVariableValues = Arrays.stream(actionCommand.pathVariables())
-                .map(p -> evaluateParameter(p, resource)).iterator();
+                .map(p -> expressionEvaluator.evaluateParameter(p, resource)).iterator();
 
         // TODO: Support controller methods which take form posts with @RequestParam too
         for (int i = 0; i < parameters.length; i++) {
@@ -250,75 +197,8 @@ public class ActionDecorator extends ApplicationObjectSupport {
         return arguments;
     }
 
-    private Optional<ActionableResourceSupport.Action> processWorkflowAction(ActionableResourceSupport resource, ActionCommand actionCommand, final URI businessKey) {
-
-        final List<? extends DeployedWorkflowProcessEntity> targetProcesses = deployedWorkflowProcessRepository.findAllByStartMessage(actionCommand.message());
-
-        if (!targetProcesses.isEmpty()) {
-            // TODO: demoware - this check is too broad, we want multiple users to be able to create workflows, and we don't mind multiple workflows of the same type either.
-            // This checks for ANY process for this resource with a user task, and refuses to create a new one if there is already one.
-            List<? extends WorkflowTaskEntity> existingTasks = workflowTaskRepository.findAllByProcessInstanceBusinessKey(businessKey.toString());
-            if (existingTasks.isEmpty()) {
-                final Stream<WorkflowTaskFormField> fields = targetProcesses.stream()
-                        .flatMap(p -> p.getStartFormFields().stream());
-                Map<String, String> parameters = evaluateWorkflowVariables(resource, actionCommand.workFlowVariables());
-
-                final ControllerLinkBuilder actionLink = linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null));
-                final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
-                        UriComponentsBuilder.fromUriString(actionLink.toString())
-                                .replaceQuery(null).build(true).toUri(), // strip parameters
-                        actionCommand.title().isEmpty()? actionCommand.message() : actionCommand.title(),
-                        actionCommand.description(),
-                        formFieldSchemaCreator.createSchema(fields, parameters)
-                );
-                action.setEnctype(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-                action.setMethod(HttpMethod.POST.toString());
-                action.setTargetSchema(new NullSchema());
-                action.setRel(actionCommand.name());
-                if (!actionCommand.titleKey().isEmpty()) localisationService.ifMessagePresent(actionCommand.titleKey(), action::setTitle);
-                return Optional.of(action);
-            } else {
-                log.debug("Found a workflow action command but there was already a process with the business key");
-            }
-        } else {
-            log.debug("Found a workflow action command but no start target was found");
-        }
-        return Optional.empty();
-    }
-
-
-    protected ActionableResourceSupport.Action processWorkflowTaskAction(WorkflowTaskEntity task, String businessKey, Map<String,String> parameters) {
-        final String formKey = task.getFormKey();
-
-        FormKeyHandler formKeyHandler = formKeyHandlers.stream()
-                .filter(handler -> handler.canCreateActions(formKey))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(formKey + " form key is found but no suitable FormKeyHandler available in "
-                        + formKeyHandlers.stream().map(FormKeyHandler::getName).collect(toList())));
-
-        return formKeyHandler.createAction(task, businessKey, parameters);
-    }
-
     private boolean checkCondition(ActionCommand actionCommand, ActionableResourceSupport resource) {
-        final Expression expression = new SpelExpressionParser().parseExpression(actionCommand.condition(), new TemplateParserContext());
-
-        StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
-        evalContext.setBeanResolver(new BeanFactoryResolver(getApplicationContext()));
-        return expression.getValue(evalContext, Boolean.class);
-    }
-
-    private Object evaluateParameter(ActionParameter parameter, ActionableResourceSupport resource) {
-        final String value = parameter.value();
-        return evaluateExpression(resource, value);
-    }
-
-    private Object evaluateExpression(ActionableResourceSupport resource, String expr) {
-        final Expression expression = new SpelExpressionParser().parseExpression(expr, new TemplateParserContext());
-
-        StandardEvaluationContext evalContext = new StandardEvaluationContext(resource);
-        evalContext.setBeanResolver(new BeanFactoryResolver(getApplicationContext()));
-
-        return expression.getValue(evalContext);
+        return expressionEvaluator.evaluateExpression(resource, actionCommand.condition(), Boolean.class);
     }
 
     ActionCommand[] findAnnotations(ActionableResourceSupport resource) {

@@ -37,15 +37,15 @@ public class ActionAwareWorkflowController {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final WorkflowService workflowService;
     private final WorkflowTaskRepository workflowTaskRepository;
-    private final ActionDecorator actionDecorator;
+    private final WorkflowActionDelegate workflowActionDelegate;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public ActionAwareWorkflowController(WorkflowService workflowService, WorkflowTaskRepository workflowTaskRepository, ActionDecorator actionDecorator) {
+    public ActionAwareWorkflowController(WorkflowService workflowService, WorkflowTaskRepository workflowTaskRepository, WorkflowActionDelegate workflowActionDelegate) {
         this.workflowService = workflowService;
         this.workflowTaskRepository = workflowTaskRepository;
-        this.actionDecorator = actionDecorator;
+        this.workflowActionDelegate = workflowActionDelegate;
     }
 
     @RequestMapping(value = "/instanceKey/{businessKey}/handlers/{eventName}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
@@ -64,7 +64,7 @@ public class ActionAwareWorkflowController {
         
         //get the actions and set them in the resource
         tasks.stream()
-             .map(t -> actionDecorator.processWorkflowTaskAction(t, businessKey, parameters))
+             .map(t -> workflowActionDelegate.processWorkflowTaskAction(t, businessKey, parameters))
              .forEach((action) -> {
                     if (action != null) {
                         //convert this to a spring link to set on the resource
