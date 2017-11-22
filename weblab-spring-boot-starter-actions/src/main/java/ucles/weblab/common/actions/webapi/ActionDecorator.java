@@ -154,6 +154,9 @@ public class ActionDecorator {
         );
         action.setEnctype(requestMapping.consumes().length > 0 ? requestMapping.consumes()[0] : MediaType.APPLICATION_JSON_VALUE);
         action.setMethod((requestMapping.method().length > 0 ? requestMapping.method()[0] : HttpMethod.POST).toString());
+        if (requestMapping.produces().length > 0) {
+            action.setMediaType(requestMapping.produces()[0]);
+        }
         action.setTargetSchema(new NullSchema());
         action.setRel(actionCommand.name());
         if (!actionCommand.titleKey().isEmpty()) localisationService.ifMessagePresent(actionCommand.titleKey(), action::setTitle);
