@@ -43,6 +43,7 @@ import static ucles.weblab.common.webapi.MoreMediaTypes.APPLICATION_JSON_UTF8_VA
 @RestController
 @RequestMapping("/api/workflow")
 @PreAuthorize("isAuthenticated()")
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class WorkflowController {
     private final DeployedWorkflowProcessRepository deployedWorkflowProcessRepository;
     private final EditableWorkflowProcessRepository editableWorkflowProcessRepository;
@@ -196,7 +197,7 @@ public class WorkflowController {
         return listWrapper;
     }
 
-    @RequestMapping(value = "/models$schema", method = RequestMethod.GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/models$schema", method = GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
     public ResponseEntity<JsonSchema> describeWorkflowModels() {
         final JsonSchema body = schemaCreator.create(WorkflowModelResource.class,
                 methodOn(WorkflowController.class).describeWorkflowModels(),
@@ -205,7 +206,7 @@ public class WorkflowController {
         return ResponseEntity.ok(body);
     }
 
-    @RequestMapping(value = "/processes$schema", method = RequestMethod.GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/processes$schema", method = GET, produces = APPLICATION_SCHEMA_JSON_UTF8_VALUE)
     public ResponseEntity<JsonSchema> describeWorkflowProcesses() {
         final JsonSchema body = schemaCreator.create(WorkflowProcessDefResource.class,
                 methodOn(WorkflowController.class).describeWorkflowProcesses(),

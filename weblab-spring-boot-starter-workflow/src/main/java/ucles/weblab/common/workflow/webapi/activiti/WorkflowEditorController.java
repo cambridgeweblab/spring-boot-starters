@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,7 +53,7 @@ public class WorkflowEditorController {
      * Replaces the {@code MultiValueMap} of the original with named parameters, due to
      * <a href='https://github.com/spring-projects/spring-boot/issues/6519'>Issue #6519</a>.
      *
-     * @see org.activiti.rest.editor.model.ModelSaveRestResource#saveModel(String, MultiValueMap)
+     * @see org.activiti.rest.editor.model.ModelSaveRestResource#saveModel(String, org.springframework.util.MultiValueMap)
      */
     @RequestMapping(value = "/model/{modelId}/save", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseStatus(value = HttpStatus.OK)

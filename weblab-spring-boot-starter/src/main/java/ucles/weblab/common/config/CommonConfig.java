@@ -65,6 +65,7 @@ public class CommonConfig {
     public static class CommonConfigWeb {
 
         private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
+        @SuppressWarnings("PMD.AvoidDollarSigns")
         private static final String $_WSSP = "$wssp";
 
         @Autowired
@@ -77,7 +78,7 @@ public class CommonConfig {
         @Bean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
         @ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
         MultipartResolver multipartResolver() {
-            MultipartConfigElement multipartConfigElement = multipartProperties.createMultipartConfig();;
+            MultipartConfigElement multipartConfigElement = multipartProperties.createMultipartConfig();
             JerseyMultipartResolver jerseyMultipartResolver = new JerseyMultipartResolver();
             jerseyMultipartResolver.setSizeMax(multipartConfigElement.getMaxRequestSize());
             jerseyMultipartResolver.setFileSizeMax(multipartConfigElement.getMaxFileSize());
@@ -97,9 +98,10 @@ public class CommonConfig {
             registrationBean.setFilter(new OncePerRequestFilter() {
                 @Override
                 protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-                    if (httpServletRequest.getHeader($_WSSP) != null && httpServletRequest.getHeader(X_FORWARDED_PORT) == null) {
+                    HttpServletRequest onwardRequest = httpServletRequest;
+                    if (onwardRequest.getHeader($_WSSP) != null && onwardRequest.getHeader(X_FORWARDED_PORT) == null) {
                         // Wrap the request and add the header
-                        httpServletRequest = new HttpServletRequestWrapper(httpServletRequest) {
+                        onwardRequest = new HttpServletRequestWrapper(httpServletRequest) {
                             List<String> headerNames = null;
 
                             @Override
@@ -131,7 +133,7 @@ public class CommonConfig {
                             }
                         };
                     }
-                    filterChain.doFilter(httpServletRequest, httpServletResponse);
+                    filterChain.doFilter(onwardRequest, httpServletResponse);
                 }
             });
             registrationBean.setName("xForwardedPortFilter");

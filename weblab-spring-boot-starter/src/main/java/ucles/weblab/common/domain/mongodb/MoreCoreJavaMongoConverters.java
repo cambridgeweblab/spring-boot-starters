@@ -66,7 +66,7 @@ public class MoreCoreJavaMongoConverters {
 
         @Override
         public URI convert(String source) {
-            return !StringUtils.hasText(source)? null: URI.create(source);
+            return StringUtils.hasText(source) ? URI.create(source) : null;
         }
     }
 
@@ -87,7 +87,7 @@ public class MoreCoreJavaMongoConverters {
         @Override
         public InetAddress convert(String source) {
             try {
-                return !StringUtils.hasText(source)? null : InetAddress.getByName(source);
+                return StringUtils.hasText(source) ? InetAddress.getByName(source) : null;
             } catch (UnknownHostException e) {
                 throw new IllegalArgumentException("Unknown value for InetAddress: " + source, e);
             }

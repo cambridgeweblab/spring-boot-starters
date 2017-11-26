@@ -35,6 +35,7 @@ import static java.util.Collections.singleton;
  * @since 03/11/15
  */
 @Aspect
+@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UncommentedEmptyMethodBody"}) // It's how @Pointcuts work
 public class ActionDecoratorAspect {
     private final ActionDecorator actionDecorator;
 

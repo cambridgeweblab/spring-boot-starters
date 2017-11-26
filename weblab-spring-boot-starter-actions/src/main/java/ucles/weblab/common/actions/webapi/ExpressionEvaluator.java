@@ -10,9 +10,6 @@ import ucles.weblab.common.webapi.ActionParameter;
 import ucles.weblab.common.webapi.resource.ActionableResourceSupport;
 
 public class ExpressionEvaluator extends ApplicationObjectSupport {
-    public ExpressionEvaluator() {
-    }
-
     Object evaluateParameter(ActionParameter parameter, ActionableResourceSupport resource) {
         final String value = parameter.value();
         return evaluateExpression(resource, value);

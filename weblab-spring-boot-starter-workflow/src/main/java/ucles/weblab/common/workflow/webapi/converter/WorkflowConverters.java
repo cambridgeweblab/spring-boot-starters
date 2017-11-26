@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import ucles.weblab.common.webapi.HateoasConverterRegistrar;
-import ucles.weblab.common.workflow.domain.EditableWorkflowProcessRepository;
 
 import java.util.Map;
 
@@ -25,8 +24,8 @@ public class WorkflowConverters {
     }
 
     @Bean
-    public DeployedWorkflowProcessResourceAssembler processDefinitionResourceAssembler(EditableWorkflowProcessRepository editableWorkflowProcessRepository) {
-        return new DeployedWorkflowProcessResourceAssembler(editableWorkflowProcessRepository);
+    public DeployedWorkflowProcessResourceAssembler processDefinitionResourceAssembler() {
+        return new DeployedWorkflowProcessResourceAssembler();
     }
 
     @Bean

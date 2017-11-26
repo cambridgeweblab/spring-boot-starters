@@ -39,17 +39,14 @@ public class DeployedWorkflowProcessEntityActiviti implements DeployedWorkflowPr
     private RepositoryService repositoryService;
     private FormService formService;
 
-    {
+    public DeployedWorkflowProcessEntityActiviti(ProcessDefinition processDefinition) {
         configureBean(this);
+        this.processDefinition = processDefinition;
     }
 
     public Object readResolve() {
         configureBean(this);
         return this;
-    }
-
-    public DeployedWorkflowProcessEntityActiviti(ProcessDefinition processDefinition) {
-        this.processDefinition = processDefinition;
     }
 
     @Autowired

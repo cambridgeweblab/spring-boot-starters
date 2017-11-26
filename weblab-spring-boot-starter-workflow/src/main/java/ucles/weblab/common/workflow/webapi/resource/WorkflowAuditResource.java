@@ -85,9 +85,15 @@ public class WorkflowAuditResource extends ResourceSupport implements Comparable
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         WorkflowAuditResource that = (WorkflowAuditResource) o;
         return Objects.equals(actor, that.actor) &&
                 Objects.equals(auditInstant, that.auditInstant) &&

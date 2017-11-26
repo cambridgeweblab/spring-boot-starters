@@ -68,7 +68,7 @@ public class ActionAwareWorkflowController {
              .forEach((action) -> {
                     if (action != null) {
                         //convert this to a spring link to set on the resource
-                        TitledLink tl = ActionableResourceSupport.convert(action);
+                        TitledLink tl = action.toTitledLink();
                         resource.add(tl);
                     }
               });

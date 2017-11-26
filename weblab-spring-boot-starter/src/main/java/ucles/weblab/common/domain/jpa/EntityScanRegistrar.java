@@ -57,11 +57,10 @@ class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
 			BeanDefinitionRegistry registry) {
 		Set<String> packagesToScan = getPackagesToScan(importingClassMetadata);
-		if (!registry.containsBeanDefinition(BEAN_NAME)) {
-			addEntityScanBeanPostProcessor(registry, packagesToScan);
-		}
-		else {
+		if (registry.containsBeanDefinition(BEAN_NAME)) {
 			updateEntityScanBeanPostProcessor(registry, packagesToScan);
+		} else {
+			addEntityScanBeanPostProcessor(registry, packagesToScan);
 		}
 	}
 
@@ -123,8 +122,8 @@ class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
 
 		private boolean processed;
 
-		EntityScanBeanPostProcessor(String[] packagesToScan) {
-			this.packagesToScan = packagesToScan;
+		EntityScanBeanPostProcessor(String... packagesToScan) {
+			this.packagesToScan = packagesToScan.clone();
 		}
 
 		@Override

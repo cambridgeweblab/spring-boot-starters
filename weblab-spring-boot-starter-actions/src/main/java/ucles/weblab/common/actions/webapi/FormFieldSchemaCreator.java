@@ -53,7 +53,7 @@ public class FormFieldSchemaCreator {
                         // External enumRef
                         fieldSchema = schemaFactory.stringSchema();
                         String enumRef = formField.getDefaultValue().toString();
-                        fieldSchema.setExtends(new com.fasterxml.jackson.module.jsonSchema.JsonSchema[]{
+                        fieldSchema.setExtends(new JsonSchema[]{
                                 new TypedReferenceSchema(crossContextConversionService.asUrl(URI.create(enumRef)).toString(), fieldSchema.getType())
                         });
                     } else {
@@ -64,8 +64,9 @@ public class FormFieldSchemaCreator {
                 case LONG: {
                     fieldSchema = schemaFactory.numberSchema();
                 } break;
-                default:
+                default: {
                     fieldSchema = schemaFactory.anySchema();
+                } break;
             }
             if (formField.getDefaultValue() != null) {
                 fieldSchema.asSimpleTypeSchema().setDefault(String.valueOf(formField.getDefaultValue()));

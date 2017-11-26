@@ -67,12 +67,12 @@ public class JpaUtils {
                 entityClass = (Class<? extends T>) entity.getClass();
                 entityId = strategy.getId(entity);
             }
-            if (em != null) {
+            if (em == null) {
+                log.warn("EntityManager null in ensureManaged() - cannot ensure {0} is managed.", entity.getClass());
+            } else {
                 if (!em.contains(entity)) {
                     return em.find(entityClass, entityId);
                 }
-            } else {
-                log.warn("EntityManager null in ensureManaged() - cannot ensure {0} is managed.", entity.getClass());
             }
         }
 

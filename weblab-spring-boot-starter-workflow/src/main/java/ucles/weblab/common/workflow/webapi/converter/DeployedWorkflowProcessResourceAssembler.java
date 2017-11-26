@@ -4,13 +4,11 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceAssembler;
 import ucles.weblab.common.webapi.LinkRelation;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
-import ucles.weblab.common.workflow.domain.EditableWorkflowProcessRepository;
 import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.workflow.webapi.resource.WorkflowProcessDefResource;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import static ucles.weblab.common.webapi.LinkRelation.DESCRIBED_BY;
 
 /**
  * Converter from a domain model entity to a view model resource.
@@ -18,11 +16,6 @@ import static ucles.weblab.common.webapi.LinkRelation.DESCRIBED_BY;
  * @since 17/07/15
  */
 public class DeployedWorkflowProcessResourceAssembler implements ResourceAssembler<DeployedWorkflowProcessEntity, WorkflowProcessDefResource> {
-    private final EditableWorkflowProcessRepository editableWorkflowProcessRepository;
-
-    public DeployedWorkflowProcessResourceAssembler(EditableWorkflowProcessRepository editableWorkflowProcessRepository) {
-        this.editableWorkflowProcessRepository = editableWorkflowProcessRepository;
-    }
 
     @Override
     public WorkflowProcessDefResource toResource(DeployedWorkflowProcessEntity entity) {

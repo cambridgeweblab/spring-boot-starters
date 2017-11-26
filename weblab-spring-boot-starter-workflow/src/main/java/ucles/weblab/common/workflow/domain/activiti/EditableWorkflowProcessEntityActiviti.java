@@ -31,17 +31,14 @@ public class EditableWorkflowProcessEntityActiviti implements EditableWorkflowPr
     private RepositoryService repositoryService;
     private ObjectMapper objectMapper;
 
-    {
+    public EditableWorkflowProcessEntityActiviti(Model model) {
         configureBean(this);
+        this.model = model;
     }
 
     public Object readResolve() {
         configureBean(this);
         return this;
-    }
-
-    public EditableWorkflowProcessEntityActiviti(Model model) {
-        this.model = model;
     }
 
     @Autowired
@@ -77,7 +74,7 @@ public class EditableWorkflowProcessEntityActiviti implements EditableWorkflowPr
             final byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
             return new StreamSource(new ByteArrayInputStream(bpmnBytes));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read model editor source", e);
+            throw new RuntimeException("Failed to read model editor source", e); // NOPMD
         }
     }
 
@@ -88,7 +85,7 @@ public class EditableWorkflowProcessEntityActiviti implements EditableWorkflowPr
             final byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model, UTF_8.name());
             return new String(bpmnBytes, UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read model editor source", e);
+            throw new RuntimeException("Failed to read model editor source", e); // NOPMD
         }
     }
 

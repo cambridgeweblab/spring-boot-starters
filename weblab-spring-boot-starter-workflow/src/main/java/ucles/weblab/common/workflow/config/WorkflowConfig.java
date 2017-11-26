@@ -5,7 +5,6 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.ExecutionListener;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.spring.boot.DataSourceProcessEngineAutoConfiguration;
@@ -30,13 +29,13 @@ import ucles.weblab.common.workflow.domain.activiti.HistoricWorkflowStepReposito
 import ucles.weblab.common.workflow.domain.activiti.WorkflowFactoryActiviti;
 import ucles.weblab.common.workflow.domain.activiti.WorkflowServiceActiviti;
 import ucles.weblab.common.workflow.domain.activiti.WorkflowTaskRepositoryActiviti;
+import ucles.weblab.common.workflow.exception.ActivitiExceptionHandler;
 import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.workflow.webapi.converter.WorkflowConverters;
 
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
 import java.util.UUID;
-import ucles.weblab.common.workflow.exception.ActivitiExceptionHandler;
 
 /**
  * Auto-configuration for the workflow domain.

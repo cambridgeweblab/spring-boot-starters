@@ -1,5 +1,6 @@
 package ucles.weblab.common.webapi;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,12 +12,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ucles.weblab.common.webapi.exception.*;
+import ucles.weblab.common.webapi.exception.ConflictException;
+import ucles.weblab.common.webapi.exception.ForbiddenException;
+import ucles.weblab.common.webapi.exception.ReferencedEntityNotFoundException;
+import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
+import ucles.weblab.common.webapi.exception.UnknownRefererException;
 import ucles.weblab.common.webapi.resource.ErrorResource;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import org.springframework.beans.factory.annotation.Value;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
@@ -58,11 +62,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = ConflictException.class)
     protected ResponseEntity<Object> handleConflictException(ConflictException e, WebRequest request) {
-        if (e.getConflictingItems() != null && !e.getConflictingItems().isEmpty()) {
-            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), e.getDetail(), e.getConflictingItems()),
+        if (e.getConflictingItems() == null || e.getConflictingItems().isEmpty()) {
+            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
         } else {
-            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
+            return handleExceptionInternal(e, new ErrorResource(e.getMessage(), e.getDetail(), e.getConflictingItems()),
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
         }
     }
@@ -104,22 +108,22 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-
-        if (body == null) {
-            if (!suppressErrors) {
+        Object updatedBody = body;
+        if (updatedBody == null) {
+            if (suppressErrors) {
+                //if suppress errors, then just show a generic message.
+                updatedBody = new ErrorResource("An exception has occured", "An exception has occured, more details are available in server logs");
+            } else {
                 //if not suppress errors, then show the whole stack trace to the client
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 ex.printStackTrace(pw);
 
-                body = new ErrorResource(ex.getMessage(), sw.toString());
-            } else {
-                //if suppress errors, then just show a generic message.
-                body = new ErrorResource("An exception has occured", "An exception has occured, more details are available in server logs");
+                updatedBody = new ErrorResource(ex.getMessage(), sw.toString());
             }
         }
 
         headers.setContentType(APPLICATION_JSON_UTF8);
-        return super.handleExceptionInternal(ex, body, headers, status, request);
+        return super.handleExceptionInternal(ex, updatedBody, headers, status, request);
     }
 }

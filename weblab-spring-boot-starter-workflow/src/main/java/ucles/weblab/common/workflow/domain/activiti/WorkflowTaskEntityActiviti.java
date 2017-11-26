@@ -31,17 +31,14 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     private Supplier<WorkflowTaskFormField.Builder> workflowTaskFormFieldBuilder;
     private Supplier<WorkflowTaskContext.Builder> workflowTaskContextBuilder;
 
-    {
+    public WorkflowTaskEntityActiviti(Task task) {
         configureBean(this);
+        this.task = task;
     }
 
     public Object readResolve() {
         configureBean(this);
         return this;
-    }
-
-    public WorkflowTaskEntityActiviti(Task task) {
-        this.task = task;
     }
 
     @Autowired

@@ -2,7 +2,6 @@ package ucles.weblab.common.workflow.domain.activiti;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
@@ -15,7 +14,6 @@ import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.explorer.Messages;
-import org.activiti.explorer.util.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucles.weblab.common.workflow.domain.DeployedWorkflowProcessEntity;
@@ -23,19 +21,13 @@ import ucles.weblab.common.workflow.domain.EditableWorkflowProcessEntity;
 import ucles.weblab.common.workflow.domain.WorkflowService;
 import ucles.weblab.common.workflow.domain.WorkflowTaskEntity;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
 
-import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_DESCRIPTION;
-import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_NAME;
-import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_REVISION;
+import static org.activiti.editor.constants.ModelDataJsonConstants.*;
 
 /**
  * Implementation of the service layer using Activiti.
@@ -114,7 +106,20 @@ public class WorkflowServiceActiviti implements WorkflowService {
     public boolean handleEvent(String eventName, String businessKey, Map<String,String> parameters) {
         boolean messageAccepted = false;
         final List<Execution> executions = runtimeService.createExecutionQuery().processInstanceBusinessKey(businessKey).list();
-        if (!executions.isEmpty()) {
+        if (executions.isEmpty()) {
+            try {
+                //convert form strings to objects
+                Map<String,Object> objectParams = new HashMap<>();
+                parameters.keySet().stream().forEach((key) -> {
+                    objectParams.put(key, parameters.get(key));
+                });
+
+                runtimeService.startProcessInstanceByMessage(eventName, businessKey, objectParams);
+                messageAccepted = true;
+            } catch (ActivitiException e) {
+                log.warn("Event " + eventName + " with key " + businessKey + " did nothing - no process starts with that message.");
+            }
+        } else {
             for (Execution execution : executions) {
                 try {
                     runtimeService.messageEventReceivedAsync(eventName, execution.getId());
@@ -124,19 +129,6 @@ public class WorkflowServiceActiviti implements WorkflowService {
                 }
             }
             log.warn("Event " + eventName + " with key " + businessKey + " did nothing - the running process was not interested.");
-        } else {
-            try {                         
-                //convert form strings to objects
-                Map<String,Object> objectParams = new HashMap<>();
-                parameters.keySet().stream().forEach((key) -> {
-                    objectParams.put(key, parameters.get(key));
-                });
-                
-                runtimeService.startProcessInstanceByMessage(eventName, businessKey, objectParams);
-                messageAccepted = true;
-            } catch (ActivitiException e) {
-                log.warn("Event " + eventName + " with key " + businessKey + " did nothing - no process starts with that message.");
-            }
         }
 
         return messageAccepted;

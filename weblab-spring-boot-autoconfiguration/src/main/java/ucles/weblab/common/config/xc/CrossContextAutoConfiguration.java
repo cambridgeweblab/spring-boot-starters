@@ -26,7 +26,6 @@ import ucles.weblab.common.xc.service.HandlerMethodInvokingCrossContextResolver;
 
 import javax.persistence.EntityManager;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.web.client.RestTemplate;
 import ucles.weblab.common.xc.service.RestCrossContextConverter;
 import ucles.weblab.common.xc.service.RestCrossContextResolver;
 import ucles.weblab.common.xc.service.RestSettings;
@@ -44,14 +43,12 @@ public class CrossContextAutoConfiguration {
 
     @Bean
     CrossContextConversionService crossContextConversionService() {
-        CrossContextConversionServiceImpl crossContextConversionService = new CrossContextConversionServiceImpl();
-        return crossContextConversionService;
+        return new CrossContextConversionServiceImpl();
     }
 
     @Bean
     CrossContextResolverService crossContextResolverService() {
-        CrossContextResolverServiceImpl crossContextResolverService = new CrossContextResolverServiceImpl();
-        return crossContextResolverService;
+        return new CrossContextResolverServiceImpl();
     }
 
     /** Sets up conversion of CrossContextLink with a JPA 2.1 converter */
@@ -91,7 +88,7 @@ public class CrossContextAutoConfiguration {
         @Bean
         RestCrossContextResolver restCrossContextResolver(RestCrossContextConverter converter,
                                                           ObjectMapper objectMapper) {
-            return new RestCrossContextResolver(converter, new RestTemplate(), objectMapper);
+            return new RestCrossContextResolver(converter, objectMapper);
         }
 
         @Bean

@@ -2,9 +2,6 @@ package ucles.weblab.common.workflow.domain;
 
 import ucles.weblab.common.domain.Buildable;
 
-import java.io.Serializable;
-import java.util.Map;
-
 /**
  * Value object (i.e. unidentified) representation of a historic (completed) workflow step form field i.e. an input made at
  * completion of the task.

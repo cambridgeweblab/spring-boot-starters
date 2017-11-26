@@ -2,7 +2,6 @@ package ucles.weblab.common.webapi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -37,10 +36,8 @@ public class UnhandledExceptionHandler extends ControllerExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(UnhandledExceptionHandler.class);
 
-    @Value("${suppress.errors:true}")
-    private boolean suppressErrors;
-
     @ExceptionHandler
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     protected ResponseEntity<Object> handleUnhandledException(Exception e, WebRequest request) throws Exception {
         // If the exception is an AccessDeniedException, rethrow it and let the framework handle it.
         if (e instanceof AccessDeniedException) {

@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static ucles.weblab.common.domain.ConfigurableEntitySupport.configureBean;
@@ -29,18 +28,15 @@ public class HistoricWorkflowStepEntityActiviti implements HistoricWorkflowStepE
     private final List<HistoricFormProperty> historicFormProperties;
     private Supplier<HistoricWorkflowStepFormField.Builder> historicWorkflowStepFormFieldBuilder;
 
-    {
+    public HistoricWorkflowStepEntityActiviti(HistoricActivityInstance historicActivityInstance, List<HistoricFormProperty> historicFormProperties) {
         configureBean(this);
+        this.historicActivityInstance = historicActivityInstance;
+        this.historicFormProperties = historicFormProperties;
     }
 
     public Object readResolve() {
         configureBean(this);
         return this;
-    }
-
-    public HistoricWorkflowStepEntityActiviti(HistoricActivityInstance historicActivityInstance, List<HistoricFormProperty> historicFormProperties) {
-        this.historicActivityInstance = historicActivityInstance;
-        this.historicFormProperties = historicFormProperties;
     }
 
     @Autowired
@@ -70,11 +66,11 @@ public class HistoricWorkflowStepEntityActiviti implements HistoricWorkflowStepE
 
     @Override
     public List<? extends HistoricWorkflowStepFormField> getFormFields() {
-        return historicFormProperties != null? historicFormProperties.stream()
+        return historicFormProperties == null ? null : historicFormProperties.stream()
                 .map(f -> historicWorkflowStepFormFieldBuilder.get()
                         .name(f.getPropertyId())
                         .value(f.getPropertyValue())
                         .get()
-                ).collect(toList()) : null;
+                ).collect(toList());
     }
 }

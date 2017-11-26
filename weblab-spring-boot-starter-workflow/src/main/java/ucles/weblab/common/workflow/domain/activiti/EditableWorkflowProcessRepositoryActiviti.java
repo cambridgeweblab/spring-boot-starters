@@ -65,7 +65,9 @@ public class EditableWorkflowProcessRepositoryActiviti implements EditableWorkfl
         repositoryService.saveModel(model);
 
         final BpmnModel bpmnModel;
-        if (entity.getBpmn20Xml() != null) {
+        if (entity.getBpmn20Xml() == null) {
+            bpmnModel = templateBpmnModel(entity);
+        } else {
             try {
                 XMLInputFactory xif = XmlUtil.createSafeXmlInputFactory();
                 XMLStreamReader xtr = xif.createXMLStreamReader(entity.getBpmn20Xml());
@@ -78,8 +80,6 @@ public class EditableWorkflowProcessRepositoryActiviti implements EditableWorkfl
             } catch (XMLStreamException e) {
                 throw new IllegalStateException(Messages.MODEL_IMPORT_FAILED, e);
             }
-        } else {
-            bpmnModel = templateBpmnModel(entity);
         }
 
         BpmnJsonConverter converter = new BpmnJsonConverter();
