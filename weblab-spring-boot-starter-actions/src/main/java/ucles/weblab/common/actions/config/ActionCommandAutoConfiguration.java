@@ -3,7 +3,6 @@ package ucles.weblab.common.actions.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -70,7 +69,7 @@ public class ActionCommandAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnBean({DeployedWorkflowProcessRepository.class, WorkflowTaskRepository.class, WorkflowService.class})
+    @ConditionalOnClass({DeployedWorkflowProcessRepository.class, WorkflowTaskRepository.class, WorkflowService.class})
     static class ActionCommandAutoConfigurationWorkflow {
 
         @Bean
