@@ -17,6 +17,7 @@ import ucles.weblab.common.webapi.exception.ForbiddenException;
 import ucles.weblab.common.webapi.exception.ReferencedEntityNotFoundException;
 import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
 import ucles.weblab.common.webapi.exception.UnknownRefererException;
+import ucles.weblab.common.webapi.exception.UnprocessableEntityException;
 import ucles.weblab.common.webapi.resource.ErrorResource;
 
 import java.io.PrintWriter;
@@ -41,6 +42,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     protected ResponseEntity<Object> handleForbiddenException(ForbiddenException e, WebRequest request) {
         return handleExceptionInternal(e, null, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    protected ResponseEntity<Object> handleUnprocessableEntityException(UnprocessableEntityException e, WebRequest request) {
+        return handleExceptionInternal(e, new ErrorResource(e.getMessage(), String.valueOf(e.getEntityReference())),
+                new HttpHeaders(), HttpStatus.UNPROCESSABLE_ENTITY, request);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
