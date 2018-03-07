@@ -14,10 +14,11 @@ build:
 
   ci:
     - mkdir -p shippable/testresults
-    # Can't do any building on a PR because the AWS variables are not available to fetch dependencies
-    - if [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode clean; fi
+    # Do deploy build if on master, otherwise just verify for other branches and PR builds
+    - then mvn --batch-mode clean
     - if [[ $BRANCH == "master" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable deploy; fi
     - if [[ $BRANCH != "master" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable verify; fi
+    - if [[ $IS_PULL_REQUEST == true ]]; then mvn --batch-mode --update-snapshots -Pshippable verify; fi
 
 integrations:
   notifications:
