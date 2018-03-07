@@ -14,10 +14,10 @@ build:
 
   ci:
     - mkdir -p shippable/testresults
-    # Do deploy build if on master, otherwise just verify for other branches and PR builds
-    - then mvn --batch-mode clean
-    - if [[ $BRANCH == "master" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable deploy; fi
-    - if [[ $BRANCH != "master" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable verify; fi
+    # Do deploy build if on release-2.0.x - DO NOT MERGE THIS COMMIT
+    - mvn --batch-mode clean
+    - if [[ $BRANCH == "release-2.0.x" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable deploy; fi
+    - if [[ $BRANCH != "release-2.0.x" ]] && [[ $IS_PULL_REQUEST != true ]]; then mvn --batch-mode --update-snapshots -Pshippable verify; fi
     - if [[ $IS_PULL_REQUEST == true ]]; then mvn --batch-mode --update-snapshots -Pshippable verify; fi
 
 integrations:
