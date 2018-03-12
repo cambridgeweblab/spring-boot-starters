@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,16 +33,16 @@ import ucles.weblab.common.forms.webapi.FormResourceAssembler;
 //@ConditionalOnBean(MongoOperations.class)
 @ConditionalOnProperty(prefix = "spring.data.mongodb.repositories", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableMongoRepositories(basePackageClasses = {FormRepositoryMongo.class})
-public class FormsMongoAutoConfiguration {      
-        
-    
+public class FormsMongoAutoConfiguration {
+
+
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
     @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
     @ComponentScan(basePackageClasses = {FormController.class })
     public static class FormsAutoConfigurationWeb {
-       
+
         @Bean
         public FormResourceAssembler formResourceAssembler(ObjectMapper objectMapper) {
             return new FormResourceAssembler(objectMapper);
@@ -55,9 +55,9 @@ public class FormsMongoAutoConfiguration {
                                         ObjectMapper objectMapper) {
             return new FormDelegate(formRepositoryMongo, formAssembler, formFactory, objectMapper);
         }
-    
+
     }
-    
+
     @Bean
     public FormFactory formFactoryMongo() {
         return new FormFactoryMongo();
