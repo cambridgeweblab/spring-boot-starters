@@ -3,17 +3,18 @@ package ucles.weblab.common.actions.webapi;
 import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.method.HandlerMethodSelector;
 import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
@@ -172,8 +173,8 @@ public class ActionDecorator {
     }
 
     private Method findControllerMethod(ActionCommand actionCommand) {
-        final Set<Method> methods = HandlerMethodSelector.selectMethods(actionCommand.controller(),
-                method -> actionCommand.method().equals(method.getName()));
+        final Set<Method> methods = MethodIntrospector.selectMethods(actionCommand.controller(),
+                (ReflectionUtils.MethodFilter) method -> actionCommand.method().equals(method.getName()));
         if (methods.size() > 1) {
             log.error("More than one controller method matches ");
             return null;
