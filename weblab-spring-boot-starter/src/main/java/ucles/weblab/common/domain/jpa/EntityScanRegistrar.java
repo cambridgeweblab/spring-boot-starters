@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Phillip Webb
  * @author Oliver Gierke
- * @deprecated as of 1.4 along with {@link EntityScan}
+ * Was deprecated as of 1.4 along with {@link EntityScan} and then removed in 1.5
  */
 @Deprecated
 class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
@@ -67,11 +67,9 @@ class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
 	private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = AnnotationAttributes
 				.fromMap(metadata.getAnnotationAttributes(EntityScan.class.getName()));
-		String[] basePackages = attributes.getAliasedStringArray("basePackages",
-				EntityScan.class, metadata.getClassName());
+		String[] basePackages = attributes.getStringArray("basePackages");
 		Class<?>[] basePackageClasses = attributes.getClassArray("basePackageClasses");
-		Set<String> packagesToScan = new LinkedHashSet<String>();
-		packagesToScan.addAll(Arrays.asList(basePackages));
+		Set<String> packagesToScan = new LinkedHashSet<>(Arrays.asList(basePackages));
 		for (Class<?> basePackageClass : basePackageClasses) {
 			packagesToScan.add(ClassUtils.getPackageName(basePackageClass));
 		}
@@ -100,7 +98,7 @@ class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
 		BeanDefinition definition = registry.getBeanDefinition(BEAN_NAME);
 		ValueHolder constructorArguments = definition.getConstructorArgumentValues()
 				.getGenericArgumentValue(String[].class);
-		Set<String> mergedPackages = new LinkedHashSet<String>();
+		Set<String> mergedPackages = new LinkedHashSet<>();
 		mergedPackages.addAll(Arrays.asList((String[]) constructorArguments.getValue()));
 		mergedPackages.addAll(packagesToScan);
 		constructorArguments.setValue(toArray(mergedPackages));
