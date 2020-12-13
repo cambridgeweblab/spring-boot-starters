@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *
  * @since 13/04/15
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class WebTestSupport {
     private WebTestSupport() { // Prevent instantiation
     }

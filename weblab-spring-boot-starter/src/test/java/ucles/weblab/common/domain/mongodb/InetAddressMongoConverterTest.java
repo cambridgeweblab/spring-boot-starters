@@ -1,7 +1,6 @@
 package ucles.weblab.common.domain.mongodb;
 
 import org.junit.Test;
-import ucles.weblab.common.domain.jpa.MoreCoreJavaJpaConverters;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -22,6 +22,7 @@ import java.time.Instant;
         method = "createAndReturnModelForProcess",
         pathVariables = { @ActionParameter("#{processId}") }
 )
+@SuppressWarnings("PMD.DataClass")
 public class WorkflowProcessDefResource extends ActionableResourceSupport {
     @JsonIgnore
     private String processId;

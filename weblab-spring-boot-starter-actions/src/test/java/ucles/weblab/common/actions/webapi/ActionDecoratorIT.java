@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @Import(ActionCommandAutoConfiguration.class)
-public class ActionDecorator_IT {
+public class ActionDecoratorIT {
     @Configuration
     public static class Config {
         @Bean

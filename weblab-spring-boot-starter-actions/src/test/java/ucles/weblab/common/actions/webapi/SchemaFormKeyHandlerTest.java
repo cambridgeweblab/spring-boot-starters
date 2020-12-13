@@ -41,6 +41,7 @@ import static org.mockito.Mockito.*;
  * @since 23/12/15
  */
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.MethodNamingConventions")
 public class SchemaFormKeyHandlerTest {
     JsonSchemaFactory schemaProvider = new JsonSchemaFactory();
 

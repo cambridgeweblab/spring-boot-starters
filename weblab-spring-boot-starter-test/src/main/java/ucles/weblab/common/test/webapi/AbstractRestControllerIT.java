@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -25,10 +25,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @since 25/06/15
  */
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
-public abstract class AbstractRestController_IT {
+public abstract class AbstractRestControllerIT {
     protected static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
-            Charset.forName("utf8"));
+            StandardCharsets.UTF_8);
 
     protected MockMvc mockMvc;
     protected HttpMessageConverter mappingJackson2HttpMessageConverter;
@@ -40,9 +40,9 @@ public abstract class AbstractRestController_IT {
     protected HttpMessageConverter<?>[] converters;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
-        this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
+        this.mappingJackson2HttpMessageConverter = Arrays.stream(converters)
                 .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
                 .findAny()
                 .get();

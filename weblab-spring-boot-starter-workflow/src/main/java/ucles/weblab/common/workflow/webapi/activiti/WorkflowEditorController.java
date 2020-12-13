@@ -134,8 +134,7 @@ public class WorkflowEditorController {
     public
     @ResponseBody
     String getStencilset() {
-        InputStream stencilsetStream = this.getClass().getClassLoader().getResourceAsStream("stencilset.json");
-        try {
+        try (InputStream stencilsetStream = this.getClass().getClassLoader().getResourceAsStream("stencilset.json")) {
             return IOUtils.toString(stencilsetStream, "utf-8");
         } catch (Exception e) {
             throw new ActivitiException("Error while loading stencil set", e);

@@ -105,7 +105,7 @@ class EntityScanRegistrar implements ImportBeanDefinitionRegistrar {
 	}
 
 	private String[] toArray(Set<String> set) {
-		return set.toArray(new String[set.size()]);
+		return set.toArray(new String[0]);
 	}
 
 	/**

@@ -81,8 +81,7 @@ public class DeployedWorkflowProcessEntityActiviti implements DeployedWorkflowPr
 
     @Override
     public byte[] getPngDiagram() {
-        final InputStream processDiagram = repositoryService.getProcessDiagram(processDefinition.getId());
-        try {
+        try (InputStream processDiagram = repositoryService.getProcessDiagram(processDefinition.getId())) {
             return StreamUtils.copyToByteArray(processDiagram);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -105,6 +104,7 @@ public class DeployedWorkflowProcessEntityActiviti implements DeployedWorkflowPr
     }
 
     @Override
+    @SuppressWarnings("PMD.UseLocaleWithCaseConversions")
     public List<? extends WorkflowTaskFormField> getStartFormFields() {
         // See also formProperty.getType().getInformation("datePattern") and formProperty.getType().getInformation("values")
         Function<FormType, WorkflowTaskFormField.FormFieldType> typeMapper = t ->

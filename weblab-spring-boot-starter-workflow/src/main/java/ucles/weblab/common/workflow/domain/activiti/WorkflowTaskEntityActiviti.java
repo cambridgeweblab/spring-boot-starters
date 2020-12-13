@@ -83,6 +83,7 @@ public class WorkflowTaskEntityActiviti implements WorkflowTaskEntity {
     }
 
     @Override
+    @SuppressWarnings("PMD.UseLocaleWithCaseConversions")
     public List<? extends WorkflowTaskFormField> getFormFields() {
         // See also formProperty.getType().getInformation("datePattern") and formProperty.getType().getInformation("values")
         Function<FormType, WorkflowTaskFormField.FormFieldType> typeMapper = t ->
