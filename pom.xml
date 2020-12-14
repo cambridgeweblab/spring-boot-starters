@@ -18,11 +18,13 @@
     </modules>
 
     <properties>
-        <common-java.version>2.0.0-SNAPSHOT</common-java.version>
+        <!-- NOTE: Dependency management comes via weblab-common-java's Spring Boot as well
+             as Spring Boot so they may conflict if not aligned -->
+        <common-java.version>2.1.0-SNAPSHOT</common-java.version>
         <spring-boot.version>2.1.17.RELEASE</spring-boot.version>
         <spring-security-jwt.version>1.0.9.RELEASE</spring-security-jwt.version>
         <activiti.version>5.19.0.1</activiti.version>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -212,7 +214,7 @@
                             <configuration>
                                 <redirectTestOutputToFile>true</redirectTestOutputToFile>
                                 <reportsDirectory>../shippable/testresults</reportsDirectory>
-                                <tempDir>${project.build.directory}/surefire</tempDir>
+                                <workingDirectory>${project.build.directory}/surefire</workingDirectory>
                             </configuration>
                         </plugin>
                     </plugins>
