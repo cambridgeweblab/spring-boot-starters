@@ -108,9 +108,9 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>ucles.weblab</groupId>
-                        <artifactId>weblab-lint</artifactId>
-                        <version>0.4-SNAPSHOT</version>
+                        <groupId>com.github.cambridgeweblab</groupId>
+                        <artifactId>java-lint-config-weblab</artifactId>
+                        <version>5648bcc8e1</version>
                     </dependency>
                 </dependencies>
             </plugin>
