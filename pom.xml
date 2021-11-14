@@ -20,8 +20,8 @@
     <properties>
         <!-- NOTE: Dependency management comes via weblab-common-java's Spring Boot as well
              as Spring Boot so they may conflict if not aligned -->
-        <common-java.version>2.3.0-SNAPSHOT</common-java.version>
-        <spring-boot.version>2.3.9.RELEASE</spring-boot.version>
+        <common-java.version>2.3.0</common-java.version>
+        <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
         <spring-security-jwt.version>1.0.9.RELEASE</spring-security-jwt.version>
         <activiti.version>5.19.0.1</activiti.version>
         <java.version>11</java.version>
@@ -110,7 +110,7 @@
                     <dependency>
                         <groupId>com.github.cambridgeweblab</groupId>
                         <artifactId>java-lint-config-weblab</artifactId>
-                        <version>5648bcc8e1</version>
+                        <version>3.0.1</version>
                     </dependency>
                 </dependencies>
             </plugin>

@@ -1,0 +1,40 @@
+branches:
+  - "+([0-9])?(.{+([0-9]),x}).x"
+  - main
+  - dev
+  - next
+  - next-major
+  - name: "beta"
+    prerelease: true
+  - name: "alpha"
+    prerelease: true
+
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - "@semantic-release/changelog"
+  - "@semantic-release/git"
+  - "@semantic-release/github"
+
+verifyConditions:
+  - "@semantic-release/github"
+  - '@conveyal/maven-semantic-release'
+
+prepare:
+  - '@conveyal/maven-semantic-release'
+#   - path: "@semantic-release/changelog"
+#     changelogFile: "docs/CHANGELOG.md"
+
+verifyRelease:
+  - '@conveyal/maven-semantic-release'
+
+
+publish:
+  - "@semantic-release/github"
+  - '@conveyal/maven-semantic-release'
+
+success:
+  - "@semantic-release/github" # Add a comment to issues and PRs that are resolved in this release
+
+# fail:
+#   - "@semantic-release/github" # open an issue on Github if the release fails

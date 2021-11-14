@@ -5,12 +5,13 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
 
     runs-on: ubuntu-latest
 
@@ -22,6 +23,8 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
+      env:
+        GITHUB_TOKEN: ${{ secrets.NU_DEPLOY_TOKEN }}
     - name: Cache Maven dependencies
       uses: actions/cache@v2.1.1
       with:
@@ -30,3 +33,19 @@ jobs:
         restore-keys: ${{runner.os}}-m2-
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
+    - name: Setup Node.js and semantic-release plugins
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+      env:
+        GITHUB_TOKEN: ${{ secrets.NU_DEPLOY_TOKEN }}
+    - name: Cache npm install
+      uses: bahmutov/npm-install@v1.6.0
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.NU_DEPLOY_TOKEN }}
+      run: |
+        npx semantic-release
+#         --use-conveyal-workflow \
+
+

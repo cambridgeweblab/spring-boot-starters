@@ -1,0 +1,14 @@
+<!-- File created because https://github.com/conveyal/maven-semantic-release#step-3-create-a-maven-settingsxml-file
+     says to and maven-semantic-release v5.0.0 fails without it.
+     What we actually want is github provided settings.xml as mentioned at
+     https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven#publishing-packages-to-github-packages
+ -->
+<settings>
+    <servers>
+        <server>
+            <id>github</id>
+            <username>${env.GITHUB_ACTOR}</username>
+            <password>${env.GITHUB_TOKEN}</password>
+        </server>
+    </servers>
+</settings>
