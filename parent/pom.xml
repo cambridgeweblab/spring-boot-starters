@@ -4,24 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.cambridgeweblab</groupId>
-    <artifactId>weblab-spring-boot</artifactId>
+    <groupId>com.github.cambridgeweblab.spring-boot-starters</groupId>
+    <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <version>2.3.0-SNAPSHOT</version>
 
-    <modules>
-        <module>parent</module>
-        <module>weblab-spring-boot-starter</module>
-        <module>weblab-spring-boot-starter-test</module>
-        <module>weblab-spring-boot-starter-workflow</module>
-        <module>weblab-spring-boot-starter-actions</module>
-        <module>weblab-spring-boot-autoconfiguration</module>
-    </modules>
 
     <properties>
         <!-- NOTE: Dependency management comes via weblab-common-java's Spring Boot as well
              as Spring Boot so they may conflict if not aligned -->
-        <common-java.version>main-SNAPSHOT</common-java.version>
+        <common-java.version>2.3.0-SNAPSHOT</common-java.version>
         <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
         <spring-security-jwt.version>1.0.9.RELEASE</spring-security-jwt.version>
         <activiti.version>5.19.0.1</activiti.version>
@@ -59,8 +51,8 @@
         <dependencies>
             <!-- WEBLAB COMMON -->
             <dependency>
-                <groupId>com.github.cambridgeweblab</groupId>
-                <artifactId>common-java</artifactId>
+                <groupId>com.github.cambridgeweblab.common-java</groupId>
+                <artifactId>parent</artifactId>
                 <version>${common-java.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -167,35 +159,4 @@
             </plugin>
         </plugins>
     </reporting>
-
-    <profiles>
-        <profile>
-            <id>shippable</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-plugin</artifactId>
-                            <version>2.20</version>
-                            <configuration>
-                                <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                                <reportsDirectory>../shippable/testresults</reportsDirectory>
-                                <tempDir>${project.build.directory}/surefire</tempDir>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-failsafe-plugin</artifactId>
-                            <configuration>
-                                <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                                <reportsDirectory>../shippable/testresults</reportsDirectory>
-                                <workingDirectory>${project.build.directory}/surefire</workingDirectory>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
 </project>
