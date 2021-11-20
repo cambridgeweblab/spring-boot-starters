@@ -12,7 +12,6 @@
     <modules>
         <module>parent</module>
         <module>weblab-spring-boot-starter</module>
-        <module>weblab-spring-boot-starter-test</module>
         <module>weblab-spring-boot-starter-workflow</module>
         <module>weblab-spring-boot-starter-actions</module>
         <module>weblab-spring-boot-autoconfiguration</module>
