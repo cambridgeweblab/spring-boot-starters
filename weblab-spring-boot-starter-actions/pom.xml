@@ -46,7 +46,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.github.cambridgeweblab</groupId>
+            <groupId>com.github.cambridgeweblab.api-schema</groupId>
             <artifactId>weblab-json-schema</artifactId>
         </dependency>
         <dependency>
@@ -54,8 +54,8 @@
             <artifactId>spring-hateoas</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.cambridgeweblab.spring-boot-starters</groupId>
-            <artifactId>weblab-spring-boot-starter-test</artifactId>
+            <groupId>com.github.cambridgeweblab</groupId>
+            <artifactId>test-support</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,6 +1,6 @@
 package ucles.weblab.common.config;
 
-import com.mongodb.Mongo;
+import com.mongodb.client.MongoClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -149,7 +149,7 @@ public class CommonConfig {
     public static class CommonJpaConvertersConfig {}
 
     @Configuration
-    @ConditionalOnClass(Mongo.class)
+    @ConditionalOnClass(MongoClient.class)
     @Import({MoreCoreJavaMongoConverters.class})
     public static class CommonMongoConvertersConfig {}
 

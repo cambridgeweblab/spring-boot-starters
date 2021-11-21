@@ -23,7 +23,7 @@ import java.time.Instant;
         pathVariables = { @ActionParameter("#{processId}") }
 )
 @SuppressWarnings("PMD.DataClass")
-public class WorkflowProcessDefResource extends ActionableResourceSupport {
+public class WorkflowProcessDefResource extends ActionableResourceSupport<WorkflowProcessDefResource> {
     @JsonIgnore
     private String processId;
     private String key;

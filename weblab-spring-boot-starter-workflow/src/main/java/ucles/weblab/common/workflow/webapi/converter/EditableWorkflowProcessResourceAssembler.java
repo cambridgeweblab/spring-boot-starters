@@ -1,7 +1,7 @@
 package ucles.weblab.common.workflow.webapi.converter;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ucles.weblab.common.webapi.LinkRelation;
@@ -11,17 +11,17 @@ import ucles.weblab.common.workflow.domain.EditableWorkflowProcessEntity;
 import ucles.weblab.common.workflow.webapi.WorkflowController;
 import ucles.weblab.common.workflow.webapi.resource.WorkflowModelResource;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * This class is ...
  *
  * @since 17/07/15
  */
-public class EditableWorkflowProcessResourceAssembler implements ResourceAssembler<EditableWorkflowProcessEntity, WorkflowModelResource> {
+public class EditableWorkflowProcessResourceAssembler implements RepresentationModelAssembler<EditableWorkflowProcessEntity, WorkflowModelResource> {
     @Override
-    public WorkflowModelResource toResource(EditableWorkflowProcessEntity entity) {
+    public WorkflowModelResource toModel(EditableWorkflowProcessEntity entity) {
         WorkflowModelResource resource = new WorkflowModelResource(entity.getKey(), entity.getName(),
                 entity.getLastUpdatedInstant());
 

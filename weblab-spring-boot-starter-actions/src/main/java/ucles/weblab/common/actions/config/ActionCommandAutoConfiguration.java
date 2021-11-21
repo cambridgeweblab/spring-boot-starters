@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.actions.webapi.ActionAwareWorkflowController;
 import ucles.weblab.common.actions.webapi.ActionDecorator;
@@ -101,7 +101,7 @@ public class ActionCommandAutoConfiguration {
         }
 
         @ConditionalOnWebApplication
-        @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
+        @ConditionalOnClass({RestController.class, RepresentationModelAssembler.class, ObjectMapper.class})
         @Bean
         ActionAwareWorkflowController actionAwareWorkflowController(WorkflowService workflowService,
                                                                     WorkflowTaskRepository workflowTaskRepository,

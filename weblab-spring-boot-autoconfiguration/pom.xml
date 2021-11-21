@@ -38,17 +38,17 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.github.cambridgeweblab</groupId>
+            <groupId>com.github.cambridgeweblab.api-schema</groupId>
             <artifactId>weblab-json-schema</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.github.cambridgeweblab</groupId>
+            <groupId>com.github.cambridgeweblab.api-schema</groupId>
             <artifactId>weblab-cross-context</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.github.cambridgeweblab</groupId>
+            <groupId>com.github.cambridgeweblab.api-schema</groupId>
             <artifactId>weblab-forms</artifactId>
             <optional>true</optional>
         </dependency>

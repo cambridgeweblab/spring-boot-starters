@@ -2,7 +2,7 @@ package ucles.weblab.common.actions.webapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  *     <dt>variable</dt>
  *     <dd>the schema is taken from a String workflow variable and used directly</dd>
  *     <dt>resource</dt>
- *     <dd>the schema is generated from a resource class (subclass of {@link org.springframework.hateoas.ResourceSupport}.</dd>
+ *     <dd>the schema is generated from a resource class (subclass of {@link org.springframework.hateoas.RepresentationModel}.</dd>
  * </dl>
  * Unknown subtypes will lead to a runtime exception.
  */
@@ -55,11 +55,11 @@ public class SchemaFormKeyHandler extends TaskCompletingFormKeyHandler {
                     }
                     break;
                 case "resource": // Schema is taken directly from a resource
-                    Class<?> resourceClass = null;
+                    Class<?> resourceClass;
                     try {
                         resourceClass = Class.forName(matcher.group(2));
-                        Assert.isAssignable(ResourceSupport.class, resourceClass);
-                        return resourceSchemaCreator.create((Class<ResourceSupport>) resourceClass, URI.create("urn:none"),
+                        Assert.isAssignable(RepresentationModel.class, resourceClass);
+                        return resourceSchemaCreator.create((Class<RepresentationModel>) resourceClass, URI.create("urn:none"),
                                 Optional.empty(), Optional.empty());
                     } catch (ClassNotFoundException | IllegalArgumentException e) {
                         log.error("Workflow defined schema form key '" + formKey + "' which did not match a resource on the classpath");

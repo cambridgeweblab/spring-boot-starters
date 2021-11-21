@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.forms.domain.FormFactory;
 import ucles.weblab.common.forms.domain.mongo.FormFactoryMongo;
@@ -39,7 +39,7 @@ public class FormsMongoAutoConfiguration {
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
-    @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
+    @ConditionalOnClass({RestController.class, RepresentationModelAssembler.class, ObjectMapper.class})
     @ComponentScan(basePackageClasses = {FormController.class })
     public static class FormsAutoConfigurationWeb {
 

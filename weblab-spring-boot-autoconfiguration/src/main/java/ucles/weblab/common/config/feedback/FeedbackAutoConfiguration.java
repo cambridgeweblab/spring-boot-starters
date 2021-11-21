@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.audit.domain.AccessAuditRepository;
 import ucles.weblab.common.feedback.domain.jpa.FeedbackEntityJpa;
@@ -55,7 +55,7 @@ public class FeedbackAutoConfiguration {
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
-    @ConditionalOnClass({FeedbackController.class, RestController.class, ResourceAssembler.class, ObjectMapper.class})
+    @ConditionalOnClass({FeedbackController.class, RestController.class, RepresentationModelAssembler.class, ObjectMapper.class})
     public static class FeedbackAutoConfigurationWeb {
 
         @Bean

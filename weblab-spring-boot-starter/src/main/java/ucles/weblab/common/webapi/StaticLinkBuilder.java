@@ -1,7 +1,11 @@
 package ucles.weblab.common.webapi;
 
-import org.springframework.hateoas.core.LinkBuilderSupport;
+import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.server.core.LinkBuilderSupport;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 /**
  * Simple link builder which allows one to build links to absolute paths.
@@ -9,8 +13,13 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 05/11/15
  */
 public class StaticLinkBuilder extends LinkBuilderSupport<StaticLinkBuilder> {
+
     public StaticLinkBuilder(UriComponentsBuilder builder) {
-        super(builder);
+        super(builder.build());
+    }
+
+    public StaticLinkBuilder(UriComponents components, List<Affordance> affordances) {
+        super(components, affordances);
     }
 
     @Override
@@ -19,8 +28,8 @@ public class StaticLinkBuilder extends LinkBuilderSupport<StaticLinkBuilder> {
     }
 
     @Override
-    protected StaticLinkBuilder createNewInstance(UriComponentsBuilder builder) {
-        return new StaticLinkBuilder(builder);
+    protected StaticLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances) {
+        return new StaticLinkBuilder(components, affordances);
     }
 }
 

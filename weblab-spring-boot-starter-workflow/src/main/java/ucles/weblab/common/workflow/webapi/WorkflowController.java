@@ -2,7 +2,8 @@ package ucles.weblab.common.workflow.webapi;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,8 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static ucles.weblab.common.schema.webapi.SchemaMediaTypes.APPLICATION_SCHEMA_JSON_UTF8_VALUE;
@@ -76,7 +77,7 @@ public class WorkflowController {
         // The resource assembler checks if there is already a model with the same key as this process and
         // links to either #createAndReturnModelForProcess or #returnModelForProcess depending on that check.
         return ResourceListWrapper.wrap(entities.stream()
-                .map(deployedWorkflowProcessResourceAssembler::toResource)
+                .map(deployedWorkflowProcessResourceAssembler::toModel)
                 .collect(toList()));
     }
 
@@ -86,7 +87,7 @@ public class WorkflowController {
                 .orElseThrow(() -> new ResourceNotFoundException(processId));
         // The resource assembler checks if there is already a model with the same key as this process and
         // links to either #createAndReturnModelForProcess or #returnModelForProcess depending on that check.
-        return deployedWorkflowProcessResourceAssembler.toResource(entity);
+        return deployedWorkflowProcessResourceAssembler.toModel(entity);
     }
 
     @RequestMapping(value = "/processes/{processId}/", method = GET, produces = APPLICATION_XML_VALUE)
@@ -104,13 +105,13 @@ public class WorkflowController {
     }
 
     @RequestMapping(value = "/processes/{processId}/model/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ResourceSupport> createAndReturnModelForProcess(@PathVariable String processId) {
+    public ResponseEntity<RepresentationModel> createAndReturnModelForProcess(@PathVariable String processId) {
         final DeployedWorkflowProcessEntity entity = deployedWorkflowProcessRepository.findOneById(processId)
                 .orElseThrow(() -> new ResourceNotFoundException(processId));
 
         final EditableWorkflowProcessEntity model = workflowService.convertProcessDefinitionToModel(entity);
 
-        ResourceSupport resource = new ResourceSupport();
+        RepresentationModel resource = new RepresentationModel();
         resource.add(linkTo(methodOn(WorkflowController.class).returnModelForProcess(model.getId())).withSelfRel());
         return new ResponseEntity<>(resource, locationHeader(resource), HttpStatus.SEE_OTHER);
     }
@@ -118,7 +119,7 @@ public class WorkflowController {
     @RequestMapping(value = "/models", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
     public ResourceListWrapper<WorkflowModelResource> listModels() {
         return ResourceListWrapper.wrap(editableWorkflowProcessRepository.findAll().stream()
-                .map(editableWorkflowProcessResourceAssembler::toResource)
+                .map(editableWorkflowProcessResourceAssembler::toModel)
                 .collect(toList()));
     }
 
@@ -141,13 +142,13 @@ public class WorkflowController {
             }
         };
         final EditableWorkflowProcessEntity entity = workflowFactory.newEditableWorkflowProcess(data);
-        WorkflowModelResource response = editableWorkflowProcessResourceAssembler.toResource(editableWorkflowProcessRepository.save(entity));
+        WorkflowModelResource response = editableWorkflowProcessResourceAssembler.toModel(editableWorkflowProcessRepository.save(entity));
         return new ResponseEntity<>(response, locationHeader(response), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/models/{modelId}", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
     public WorkflowModelResource returnModelForProcess(@PathVariable String modelId) {
-        return editableWorkflowProcessResourceAssembler.toResource(editableWorkflowProcessRepository.findOneById(modelId)
+        return editableWorkflowProcessResourceAssembler.toModel(editableWorkflowProcessRepository.findOneById(modelId)
                 .orElseThrow(() -> new ResourceNotFoundException(modelId)));
     }
 
@@ -167,11 +168,12 @@ public class WorkflowController {
     @RequestMapping(value = "/processes/{processId}/", method = PUT, consumes = APPLICATION_JSON_UTF8_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
     @AccessAudited
     public WorkflowProcessDefResource updateModelForProcess(@PathVariable String processId, @RequestBody WorkflowProcessDefResource processDefinition) {
-        final String modelLink = processDefinition.getLink(DESCRIBED_BY.rel()).getHref();
+        Optional<Link> link = processDefinition.getLink(DESCRIBED_BY.rel());
+        final String modelLink = link.orElseThrow().getHref();
         final String modelId = modelLink.substring(modelLink.lastIndexOf('/') + 1);
         final EditableWorkflowProcessEntity model = editableWorkflowProcessRepository.findOneById(modelId)
                 .orElseThrow(() -> new ReferencedEntityNotFoundException("Unable to find referenced model with ID", modelId));
-        return deployedWorkflowProcessResourceAssembler.toResource(workflowService.deployModelAsProcessDefinition(model));
+        return deployedWorkflowProcessResourceAssembler.toModel(workflowService.deployModelAsProcessDefinition(model));
     }
 
     @RequestMapping(value = "/instanceKey/{businessKey}/handlers/{eventName}/", method = POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
@@ -192,7 +194,7 @@ public class WorkflowController {
     @RequestMapping(value = "/instanceKey/{businessKey}/history/steps/", method = GET, produces = APPLICATION_JSON_UTF8_VALUE)
     public ResourceListWrapper<WorkflowAuditResource> listWorkflowAudit(@PathVariable String businessKey) {
         final List<? extends HistoricWorkflowStepEntity> entities = historicWorkflowStepRepository.findAllByProcessInstanceBusinessKey(businessKey);
-        ResourceListWrapper<WorkflowAuditResource> listWrapper = ResourceListWrapper.wrap(entities.stream().map(workflowAuditResourceAssembler::toResource).collect(toList()));
+        ResourceListWrapper<WorkflowAuditResource> listWrapper = ResourceListWrapper.wrap(entities.stream().map(workflowAuditResourceAssembler::toModel).collect(toList()));
         listWrapper.add(linkTo(methodOn(WorkflowController.class).describeWorkflowAudit(businessKey)).withRel(DESCRIBED_BY.rel()));
         return listWrapper;
     }

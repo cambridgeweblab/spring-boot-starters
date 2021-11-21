@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import ucles.weblab.common.i18n.service.LocalisationService;
 import ucles.weblab.common.i18n.service.impl.LocalisationServiceImpl;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
@@ -73,7 +73,7 @@ public class SchemaFormKeyHandlerTest {
         LocaleContextHolder.setLocale(savedLocale);
     }
 
-    static class DummyResource extends ResourceSupport {
+    static class DummyResource extends RepresentationModel {
         @Pattern(regexp = "================")
         String galacticSuperhighway;
 

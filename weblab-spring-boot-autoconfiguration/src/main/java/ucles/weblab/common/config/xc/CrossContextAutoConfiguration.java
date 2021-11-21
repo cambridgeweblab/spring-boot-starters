@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguratio
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.xc.domain.jpa.CrossContextLinkJpaConverters;
 import ucles.weblab.common.xc.service.ControllerIntrospectingCrossContextConverter;
@@ -61,7 +61,7 @@ public class CrossContextAutoConfiguration {
     @Configuration
     @AutoConfigureAfter({DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class})
     @ConditionalOnWebApplication
-    @ConditionalOnClass({RestController.class, ResourceAssembler.class, ObjectMapper.class})
+    @ConditionalOnClass({RestController.class, RepresentationModelAssembler.class, ObjectMapper.class})
     public static class CrossContextAutoConfigurationWeb {
         private final Logger logger = LoggerFactory.getLogger(getClass());
         @Autowired

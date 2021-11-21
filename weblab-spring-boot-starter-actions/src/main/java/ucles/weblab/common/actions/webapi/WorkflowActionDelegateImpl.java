@@ -3,7 +3,6 @@ package ucles.weblab.common.actions.webapi;
 import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -21,8 +20,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 public class WorkflowActionDelegateImpl implements WorkflowActionDelegate {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -97,8 +96,8 @@ public class WorkflowActionDelegateImpl implements WorkflowActionDelegate {
                         .flatMap(p -> p.getStartFormFields().stream());
                 Map<String, String> parameters = evaluateWorkflowVariables(resource, actionCommand.workFlowVariables());
 
-                final ControllerLinkBuilder actionLink = linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null));
-                final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
+                final var actionLink = linkTo(methodOn(ActionAwareWorkflowController.class).handleEvent(businessKey.toString(), actionCommand.message(), parameters, null));
+                final var action = new ActionableResourceSupport.Action(
                         UriComponentsBuilder.fromUriString(actionLink.toString())
                                 .replaceQuery(null).build(true).toUri(), // strip parameters
                         actionCommand.title().isEmpty() ? actionCommand.message() : actionCommand.title(),

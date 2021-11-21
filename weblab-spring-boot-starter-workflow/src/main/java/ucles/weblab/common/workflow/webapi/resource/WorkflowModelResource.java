@@ -1,6 +1,6 @@
 package ucles.weblab.common.workflow.webapi.resource;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.Instant;
 
@@ -10,7 +10,7 @@ import java.time.Instant;
  * @since 17/07/15
  */
 // TODO: add @ActionCommand to deploy the model
-public class WorkflowModelResource extends ResourceSupport {
+public class WorkflowModelResource extends RepresentationModel<WorkflowModelResource> {
     private String key;
     private String name;
     private Instant lastUpdateInstant;

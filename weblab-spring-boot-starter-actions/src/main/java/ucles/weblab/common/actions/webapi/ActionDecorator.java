@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -30,7 +31,8 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.*;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 
 public class ActionDecorator {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -56,7 +58,7 @@ public class ActionDecorator {
         this.workflowActionDelegate = workflowActionDelegate;
     }
 
-    void processResource(ActionableResourceSupport resource) {
+    void processResource(ActionableResourceSupport<ActionableResourceSupport> resource) {
         if (resource == null) {
             return;
         }
@@ -81,7 +83,7 @@ public class ActionDecorator {
         for (ActionCommand actionCommand : actionCommandList) {
             if (actionCommand.authorization().isEmpty() || securityChecker.check(actionCommand.authorization())) {
                 if (actionCommand.condition().isEmpty() || checkCondition(actionCommand, resource)) {
-                    log.info("Processing action command '" + actionCommand.name() + "' on resource " + resource.toString());
+                    log.info("Processing action command '" + actionCommand.name() + "' on resource " + resource);
 
                     if (actionCommand.message().isEmpty()) {
                         if (Void.class == actionCommand.controller()) {
@@ -95,24 +97,24 @@ public class ActionDecorator {
                         if (actionCommand.createNewKey()) {
                             commandBusinessKey = URI.create(UUID.randomUUID().toString());
                         } else {
-                            commandBusinessKey = crossContextConversionService.asUrn(URI.create(resource.getId().getHref()));
+                            commandBusinessKey = crossContextConversionService.asUrn(URI.create(resource.getLink(IanaLinkRelations.SELF).orElseThrow().getHref()));
                         }
                         workflowActionDelegate.ifPresent(delegate -> {
                             delegate.processWorkflowAction(resource, actionCommand, commandBusinessKey).ifPresent(actions::add);
                             delegate.processExistingWorkflowTaskActions(resource, Optional.of(actionCommand), commandBusinessKey, false).forEach(actions::add);
                         });
-                        if (!workflowActionDelegate.isPresent()) {
-                            log.error("Action command {} requires workflow but no workflow engine is available to process it.");
+                        if (workflowActionDelegate.isEmpty()) {
+                            log.error("Action command {} requires workflow but no workflow engine is available to process it.", actionCommand);
                         }
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Action command '" + actionCommand.name() + "' has unsatisfied condition on resource " + resource.toString());
+                        log.debug("Action command '" + actionCommand.name() + "' has unsatisfied condition on resource " + resource);
                     }
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Action command '" + actionCommand.name() + "' forbidden on resource " + resource.toString());
+                    log.debug("Action command '" + actionCommand.name() + "' forbidden on resource " + resource);
                 }
             }
         }
@@ -134,13 +136,13 @@ public class ActionDecorator {
         }
         final Parameter[] parameters = method.getParameters();
         final Object[] arguments = evaluateControllerMethodArguments(resource, actionCommand, method, parameters);
-        Class<ResourceSupport> resourceType = null;
+        Class<RepresentationModel> resourceType = null;
         if (arguments == null) {
             return Optional.empty();
         } else {
             for (Parameter parameter : parameters) {
-                if (ResourceSupport.class.isAssignableFrom(parameter.getType())) {
-                    resourceType = (Class<ResourceSupport>) parameter.getType();
+                if (RepresentationModel.class.isAssignableFrom(parameter.getType())) {
+                    resourceType = (Class<RepresentationModel>) parameter.getType();
                     break;
                 }
             }
@@ -151,7 +153,7 @@ public class ActionDecorator {
         URI href = linkTo(actionCommand.controller(), method, arguments).toUriComponentsBuilder().replaceQuery(null).build(true).toUri();
         // This linkTo() method doesn't handle trailing slashes on URLs very well, so fix it.
         if (requestMapping.path()[0].endsWith("/")) {
-            href = URI.create(href.toString() + "/");
+            href = URI.create(href + "/");
         }
         final ActionableResourceSupport.Action action = new ActionableResourceSupport.Action(
                 href,
@@ -191,12 +193,12 @@ public class ActionDecorator {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             if (parameter.getAnnotation(PathVariable.class) == null) {
-                if (parameter.getAnnotation(RequestBody.class) != null && ResourceSupport.class.isAssignableFrom(parameter.getType())) {
+                if (parameter.getAnnotation(RequestBody.class) != null && RepresentationModel.class.isAssignableFrom(parameter.getType())) {
                     log.debug("Skipping @RequestBody parameter " + i + " ");
                 } else if (parameter.getAnnotation(AuthenticationPrincipal.class) != null || parameter.getAnnotation(org.springframework.security.web.bind.annotation.AuthenticationPrincipal.class) != null || Principal.class.isAssignableFrom(parameter.getType()) || Authentication.class.isAssignableFrom(parameter.getType())) {
                     log.debug("Skipping security parameter " + i + " [" + parameter + "]");
-                } else if (parameter.getAnnotation(RequestBody.class) == null || !ResourceSupport.class.isAssignableFrom(parameter.getType())) {
-                    log.error("Controller method " + method.toString() + " parameter " + i + " [" + parameter + "] is not a @PathVariable or a @RequestBody ResourceSupport");
+                } else if (parameter.getAnnotation(RequestBody.class) == null || !RepresentationModel.class.isAssignableFrom(parameter.getType())) {
+                    log.error("Controller method " + method.toString() + " parameter " + i + " [" + parameter + "] is not a @PathVariable or a @RequestBody RepresentationModel");
                     return null;
                 }
             } else {

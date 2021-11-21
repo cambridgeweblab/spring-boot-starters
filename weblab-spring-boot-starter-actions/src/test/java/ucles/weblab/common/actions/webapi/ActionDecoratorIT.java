@@ -11,7 +11,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -146,7 +146,7 @@ public class ActionDecoratorIT {
         when(deployedWorkflowProcessRepository.findAllByStartMessage("dummy action")).thenReturn((List) Collections.singletonList(process));
         final DummyActionableResource resource = new DummyActionableResource();
         actionDecorator.processResource(resource);
-        assertTrue("Expect an action link to 'dummy action'", resource.getLinks().stream().anyMatch(l -> l.getRel().startsWith("action:") && l.getHref().contains("dummy%20action")));
+        assertTrue("Expect an action link to 'dummy action'", resource.getLinks().stream().anyMatch(l -> l.getRel().value().startsWith("action:") && l.getHref().contains("dummy%20action")));
     }
 
     @Test
@@ -155,10 +155,10 @@ public class ActionDecoratorIT {
         when(task.getFormKey()).thenReturn("unrecognised");
         when(task.getId()).thenReturn(UUID.randomUUID().toString());
 
-        when(workflowTaskRepository.findAllByProcessInstanceBusinessKey("ooh:aah")).thenReturn((List) Collections.singletonList(task));
+        when(workflowTaskRepository.findAllByProcessInstanceBusinessKey("ooh:aah")).thenReturn((List) List.of(task));
         final DummyActionableResource resource = new DummyActionableResource();
         actionDecorator.processResource(resource);
-        assertTrue("Expect an action link", resource.getLinks().stream().anyMatch(l -> l.getRel().startsWith("action:")));
+        assertTrue("Expect an action link", resource.getLinks().stream().anyMatch(l -> l.getRel().value().startsWith("action:")));
         assertTrue("Expect a history link", resource.getLinks().stream().anyMatch(l -> l.getRel().equals(LinkRelation.ARCHIVES.rel())));
     }
 
@@ -172,10 +172,10 @@ public class ActionDecoratorIT {
         final DummyActionableResource resource = new DummyActionableResource();
         resource.setGinaKey(null);
         actionDecorator.processResource(resource);
-        assertEquals("Expect no action links for null key", 0, resource.getLinks().size());
+        assertEquals("Expect no action links for null key", 0, resource.getLinks().toList().size());
     }
 
-    static class DummyResource extends ResourceSupport {
+    static class DummyResource extends RepresentationModel {
         @Pattern(regexp = "================")
         String galacticSuperhighway;
 
